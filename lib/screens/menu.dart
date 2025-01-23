@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:semesta_gym/screens/auth/loginAll.dart';
+import 'package:semesta_gym/screens/auth/registAll.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -11,7 +14,6 @@ class _MenuScreenState extends State<MenuScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
       body: Padding(
         padding: const EdgeInsets.only(right: 16, left: 16, bottom: 32),
         child: Column(
@@ -20,7 +22,9 @@ class _MenuScreenState extends State<MenuScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.to(() => RegistAllScreen(),transition: Transition.cupertino, duration: Duration(milliseconds: 500));
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFFFFF00),
                   shape: RoundedRectangleBorder(
@@ -36,7 +40,9 @@ class _MenuScreenState extends State<MenuScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.to(() => LoginAllScreen(),transition: Transition.cupertino, duration: Duration(milliseconds: 500));
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFF82ACEF),
                   shape: RoundedRectangleBorder(

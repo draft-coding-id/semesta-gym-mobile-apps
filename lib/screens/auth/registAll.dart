@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:semesta_gym/screens/menu.dart';
 
 class RegistAllScreen extends StatefulWidget {
   const RegistAllScreen({super.key});
@@ -15,7 +17,7 @@ class _RegistAllScreenState extends State<RegistAllScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios),
           onPressed: () {
-            
+            Get.off(() => MenuScreen(), transition: Transition.cupertino, duration: Duration(milliseconds: 500));
           },
         ),
       ),
