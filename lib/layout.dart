@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:semesta_gym/screens/user/courseScreen.dart';
 import 'package:semesta_gym/screens/user/homeScreen.dart';
 import 'package:semesta_gym/screens/user/memberScreen.dart';
+import 'package:semesta_gym/screens/user/profileScreen.dart';
 import 'package:semesta_gym/screens/user/scheduleScreen.dart';
 
 class Layout extends StatefulWidget {
@@ -18,6 +20,8 @@ class _LayoutState extends State<Layout> {
     const HomeScreen(),
     const Schedulescreen(),
     const MemberScreen(),
+    const CourseScreen(),
+    const Profilescreen()
 
   ];
 
