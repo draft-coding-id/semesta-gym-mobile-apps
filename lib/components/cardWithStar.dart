@@ -5,13 +5,15 @@ class Cardwithstar extends StatelessWidget {
   final String rating;
   final String imageUrl;
   final VoidCallback onTap;
-  
+  final bool showRating; // New parameter to control visibility
+
   const Cardwithstar({
     Key? key,
     required this.name,
     required this.rating,
     required this.imageUrl,
-    required this.onTap
+    required this.onTap,
+    this.showRating = true, // Default value is true (rating is visible)
   }) : super(key: key);
 
   @override
@@ -38,17 +40,32 @@ class Cardwithstar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),),
-                SizedBox(height: 5,),
-                Row(
-                  children: [
-                    Icon(Icons.star, color: Colors.yellow,),
-                    SizedBox(width: 8,),
-                    Text(rating, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),)
-                  ],
-                )
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                if (showRating)
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.yellow),
+                      const SizedBox(width: 8),
+                      Text(
+                        rating,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
-            )
+            ),
           ),
         ),
       ),
