@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:semesta_gym/screens/auth/user/loginScreen.dart';
 import 'package:semesta_gym/screens/menu.dart';
 
 class LoginAllScreen extends StatefulWidget {
@@ -30,7 +31,9 @@ class _LoginAllScreenState extends State<LoginAllScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.to(() => LoginScreenUser());
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF82ACEF),
                     shape: RoundedRectangleBorder(

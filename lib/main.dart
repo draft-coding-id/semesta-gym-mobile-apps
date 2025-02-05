@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
-import 'package:semesta_gym/screens/auth/registAll.dart';
-import 'package:semesta_gym/screens/user/detailTrainerScreen.dart';
-import 'package:semesta_gym/screens/user/homeScreen.dart';
-import 'package:semesta_gym/screens/user/recommendation.dart';
-
+import 'package:semesta_gym/screens/auth/user/loginScreen.dart';
+import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -45,7 +41,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: Layout(),
+      home: LoginAllScreen(),
     );
     
   }

@@ -5,7 +5,7 @@ class Cardwithstar extends StatelessWidget {
   final String rating;
   final String imageUrl;
   final VoidCallback onTap;
-  final bool showRating; // New parameter to control visibility
+  final bool showRating;
 
   const Cardwithstar({
     Key? key,
@@ -13,7 +13,7 @@ class Cardwithstar extends StatelessWidget {
     required this.rating,
     required this.imageUrl,
     required this.onTap,
-    this.showRating = true, // Default value is true (rating is visible)
+    this.showRating = true,
   }) : super(key: key);
 
   @override
