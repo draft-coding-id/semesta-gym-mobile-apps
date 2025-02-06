@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/components/myTextFormField.dart';
 import 'package:semesta_gym/components/passwordTextFormField.dart';
 import 'package:semesta_gym/screens/auth/user/loginScreen.dart';
+import 'package:http/http.dart' as http;
 
 class RegisterScreenUser extends StatefulWidget {
   const RegisterScreenUser({super.key});
@@ -23,7 +26,57 @@ class _RegisterScreenUserState extends State<RegisterScreenUser> {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController phoneNumberController = TextEditingController();
 
-    bool obserText = true;
+    bool isLoading = false;
+
+    Future<void> registerUser() async {
+      if (!_formKey.currentState!.validate()) {
+        return;
+      }
+
+      setState(() {
+        isLoading = true;
+      });
+
+      try {
+        final response = await http.post(
+          Uri.parse('http://10.0.2.2:3000/api/auth/register/'),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "email": emailController.text,
+            "password": passwordController.text,
+            "name": nameController.text,
+            "phone": phoneNumberController.text,
+            "role": "member"
+          }),
+        );
+
+        final responseData = jsonDecode(response.body);
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          Get.snackbar("Success", "Registration successful!",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.green,
+              colorText: Colors.white);
+
+          Get.offAll(() => LoginScreenUser());
+        } else {
+          Get.snackbar(
+              "Error", responseData["message"] ?? "Registration failed",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red,
+              colorText: Colors.white);
+        }
+      } catch (error) {
+        Get.snackbar("Error", "Something went wrong. Try again later.",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -207,11 +260,13 @@ class _RegisterScreenUserState extends State<RegisterScreenUser> {
                     ),
                     // Confirm Password end
 
-                    MainButton(
-                        onPressed: () {
-                          if (_formKey.currentState!.validate()) {}
-                        },
-                        text: "Register"),
+                    isLoading
+                        ? CircularProgressIndicator()
+                        : MainButton(
+                            onPressed: registerUser,
+                            text: "Register",
+                          ),
+
                     SizedBox(
                       height: 12,
                     ),
@@ -228,9 +283,6 @@ class _RegisterScreenUserState extends State<RegisterScreenUser> {
                               style: TextStyle(color: Color(0xFFF68989)),
                             ))
                       ],
-                    ),
-                    SizedBox(
-                      height: 12,
                     ),
                   ],
                 )

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+import 'package:semesta_gym/screens/auth/loginAll.dart';
 
 class ProfileScreenPt extends StatefulWidget {
   const ProfileScreenPt({super.key});
@@ -8,6 +11,32 @@ class ProfileScreenPt extends StatefulWidget {
 }
 
 class _ProfileScreenPtState extends State<ProfileScreenPt> {
+  String name = "";
+  String phone = "";
+  String email = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString("name") ?? "Guest";
+      phone = prefs.getString("phone") ?? "-";
+      email = prefs.getString("email") ?? "-";
+    });
+  }
+
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all saved data
+
+    Get.offAll(() => LoginAllScreen()); // Redirect to login screen
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,43 +70,39 @@ class _ProfileScreenPtState extends State<ProfileScreenPt> {
                 ],
               ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                 child: Row(
                   children: [
                     Icon(
                       Icons.person,
                       size: 44,
                     ),
-                    SizedBox(
-                      width: 16,
-                    ),
+                    SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "{name}",
+                          name,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 24,
                           ),
                         ),
-                        SizedBox(
-                          height: 0,
-                        ),
-                        Text("No. Hp : {numberPhone}")
+                        SizedBox(height: 0),
+                        Text("No. Hp: $phone"),
+                        Text("Email: $email"),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 8,),
+            SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Action for booking
+                  // Navigate to Edit Profile Screen
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
@@ -94,9 +119,7 @@ class _ProfileScreenPtState extends State<ProfileScreenPt> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // Action for booking
-                },
+                onPressed: _logout, // Call logout function
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   shape: RoundedRectangleBorder(

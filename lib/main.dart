@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
 import 'package:semesta_gym/screens/auth/user/loginScreen.dart';
 import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -12,8 +13,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return 
-    /* FutureBuilder(
+    return
+        /* FutureBuilder(
       future: Future.delayed(const Duration(seconds: 3)),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         }
       },
     ); */
-    GetMaterialApp(
+        GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Semesta GYM',
       theme: ThemeData(
@@ -43,6 +44,5 @@ class MyApp extends StatelessWidget {
       ),
       home: LoginAllScreen(),
     );
-    
   }
 }
