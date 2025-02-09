@@ -4,6 +4,7 @@ import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/components/myTextFormField.dart';
 import 'package:semesta_gym/components/passwordTextFormField.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
+import 'package:semesta_gym/screens/auth/personalTrainer/registerScreen.dart';
 
 class LoginScreenTrainer extends StatefulWidget {
   const LoginScreenTrainer({super.key});
@@ -114,7 +115,7 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
                         Text("Belum Punya Akun? "),
                         InkWell(
                             onTap: () {
-                             
+                              Get.to(() => RegisterScreenTrainer());
                             },
                             child: Text(
                               "Register",

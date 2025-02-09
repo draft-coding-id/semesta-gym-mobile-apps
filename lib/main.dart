@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
-import 'package:semesta_gym/screens/auth/user/loginScreen.dart';
-import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
+import 'package:semesta_gym/screens/menu.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,7 +41,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: LoginAllScreen(),
+      home: MenuScreen(),
     );
   }
 }

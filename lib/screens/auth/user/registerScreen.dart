@@ -7,6 +7,8 @@ import 'package:semesta_gym/components/myTextFormField.dart';
 import 'package:semesta_gym/components/passwordTextFormField.dart';
 import 'package:semesta_gym/screens/auth/user/loginScreen.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
+
 
 class RegisterScreenUser extends StatefulWidget {
   const RegisterScreenUser({super.key});
@@ -177,6 +179,8 @@ class _RegisterScreenUserState extends State<RegisterScreenUser> {
                     MyTextFormField(
                       controller: phoneNumberController,
                       name: "No. Handphone",
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       validator: (value) {
                         if (value!.isEmpty) {
                           return ("Please Enter Your Phone Number");
