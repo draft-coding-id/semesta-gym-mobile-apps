@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/components/myTextFormField.dart';
 import 'package:semesta_gym/components/passwordTextFormField.dart';
+import 'package:semesta_gym/models/user.dart';
+import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
 import 'package:semesta_gym/screens/auth/personalTrainer/registerScreen.dart';
+import 'package:http/http.dart' as http;
+import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
 
 class LoginScreenTrainer extends StatefulWidget {
   const LoginScreenTrainer({super.key});
@@ -20,6 +26,79 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
     final TextEditingController emailController = TextEditingController();
     final TextEditingController passwordController = TextEditingController();
     bool obserText = true;
+    bool isLoading = false;
+
+    Future<void> loginTrainer() async {
+      if (!_formKey.currentState!.validate()) {
+        return;
+      }
+
+      setState(() {
+        isLoading = true;
+      });
+
+      try {
+        final response = await http.post(
+          Uri.parse('http://10.0.2.2:3000/api/auth/login/'),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "email": emailController.text,
+            "password": passwordController.text,
+          }),
+        );
+
+        final responseData = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          User userInfo = User.fromJson(responseData["user"]);
+
+          if (userInfo.role != 'trainer') {
+            Get.snackbar(
+              "Error",
+              "Login dengan akun trainer",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red,
+              colorText: Colors.white,
+            );
+          } else {
+            await RememberUserPrefs.storeUserInfo(userInfo);
+
+            Get.snackbar(
+              "Success",
+              "Login successful!",
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.green,
+              colorText: Colors.white,
+            );
+
+            Future.delayed(Duration(milliseconds: 2000), () {
+              Get.offAll(() => LayoutPt());
+            });
+          }
+        } else {
+          Get.snackbar(
+            "Error",
+            responseData["message"] ??
+                "Email atau Password yang anda masukkan salah atau tidak terdaftar",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      } catch (error) {
+        print("Error: $error");
+        Get.snackbar(
+          "Error",
+          "Something went wrong. Try again later.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +128,8 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
                   children: [
                     Text(
                       "Email",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     SizedBox(
                       height: 5,
@@ -76,7 +156,8 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
                     ),
                     Text(
                       "Password",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     SizedBox(
                       height: 5,
@@ -101,11 +182,9 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
                     SizedBox(
                       height: 32,
                     ),
-                    MainButton(onPressed: () {
-                      if(_formKey.currentState!.validate()) {
-                        
-                      }
-                    }, text: "Login"),
+                    isLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : MainButton(onPressed: loginTrainer, text: "Login"),
                     SizedBox(
                       height: 12,
                     ),
@@ -123,7 +202,9 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
                             ))
                       ],
                     ),
-                    SizedBox(height: 12,),
+                    SizedBox(
+                      height: 12,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

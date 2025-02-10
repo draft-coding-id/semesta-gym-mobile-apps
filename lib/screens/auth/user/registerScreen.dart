@@ -48,7 +48,6 @@ class _RegisterScreenUserState extends State<RegisterScreenUser> {
             "password": passwordController.text,
             "name": nameController.text,
             "phone": phoneNumberController.text,
-            "role": "member"
           }),
         );
 

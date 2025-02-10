@@ -28,6 +28,20 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
   List<TrainingFocus> _selectedTrainingFocus = [];
   bool _isLoading = true;
   File? _selectedImage;
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController workoutHoursController = TextEditingController();
+  final TextEditingController pricePerSessionController =
+      TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+
+  bool isLoading = false;
 
   Future<void> fetchTrainingFocus() async {
     try {
@@ -73,6 +87,109 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
     }
   }
 
+  Future<void> _pickImage(ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(source: source);
+
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+
+      final tempDir = await getApplicationDocumentsDirectory();
+      final newPath =
+          '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final File newImage = await imageFile.copy(newPath);
+
+      String fileName = path.basename(newImage.path);
+      print("✅ Extracted File Name: $fileName");
+
+      setState(() {
+        _selectedImage = newImage;
+      });
+    }
+  }
+
+  void _showPickerDialog() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(Icons.camera),
+                title: Text('Take a Picture'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.image),
+                title: Text('Choose from Gallery'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> registerTrainer() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:3000/api/trainers/register/'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "email": emailController.text,
+          "password": passwordController.text,
+          "name": nameController.text,
+          "phone": phoneNumberController.text,
+          "trainingFocus": _selectedTrainingFocus.map((focus) => focus.id).toList(),
+          "description": descriptionController.text,
+          "hoursOfPractice": workoutHoursController.text,
+          "price": pricePerSessionController.text,
+          "picture": _selectedImage.toString()
+        }),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar("Success", "Registration successful!",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white);
+
+        Get.offAll(() => LoginScreenTrainer());
+      } else {
+        Get.snackbar("Error", responseData["message"] ?? "Registration failed",
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white);
+      }
+    } catch (error) {
+      Get.snackbar("Error", "Something went wrong. Try again later.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -81,70 +198,6 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
 
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController phoneNumberController = TextEditingController();
-    final TextEditingController descriptionController = TextEditingController();
-    final TextEditingController workoutHoursController =
-        TextEditingController();
-    final TextEditingController pricePerSession = TextEditingController();
-    final TextEditingController passwordController = TextEditingController();
-    final TextEditingController confirmPasswordController =
-        TextEditingController();
-
-    final ImagePicker _picker = ImagePicker();
-
-    Future<void> _pickImage(ImageSource source) async {
-      final XFile? pickedFile = await _picker.pickImage(source: source);
-
-      if (pickedFile != null) {
-        File imageFile = File(pickedFile.path);
-
-        final tempDir = await getApplicationDocumentsDirectory();
-        final newPath =
-            '${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final File newImage = await imageFile.copy(newPath);
-
-        // Extract only file name
-        String fileName = path.basename(newImage.path);
-        print("✅ Extracted File Name: $fileName");
-
-        setState(() {
-          _selectedImage = newImage;
-        });
-      }
-    }
-
-    void _showPickerDialog() {
-      showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return SafeArea(
-            child: Wrap(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.camera),
-                  title: Text('Take a Picture'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.camera);
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.image),
-                  title: Text('Choose from Gallery'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _pickImage(ImageSource.gallery);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -201,6 +254,36 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                       height: 16,
                     ),
 
+                    // email
+                    Text(
+                      "Email",
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    MyTextFormField(
+                      controller: emailController,
+                      name: "Email",
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return ("Please Enter Your Email");
+                        }
+                        if (!RegExp("^[a-zA-z0-9+_.-]+@[[a-zA-z0-9.-]+.[a-z]")
+                            .hasMatch(value)) {
+                          return ("Please Enter a valid email");
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        emailController.text = value!;
+                      },
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+
                     // upload image
                     Text(
                       "Photo",
@@ -209,7 +292,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                     ),
                     SizedBox(
                       height: 5,
-                    ),                
+                    ),
                     FormField<File>(
                       validator: (value) {
                         if (_selectedImage == null) {
@@ -328,22 +411,6 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                     SizedBox(
                       height: 5,
                     ),
-                    /*  MyTextFormField(
-                      controller: nameController,
-                      name: "Fokus Pelatihan",
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter your name/username";
-                        }
-                        if (value.length < 3) {
-                          return "Name must be at least 3 characters long ";
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        nameController.text = value!;
-                      },
-                    ), */
                     MultiSelectBottomSheetField(
                       initialChildSize: 0.4,
                       listType: MultiSelectListType.CHIP,
@@ -398,7 +465,6 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                       },
                       chipDisplay: MultiSelectChipDisplay.none(),
                     ),
-
                     SizedBox(
                       height: 16,
                     ),
@@ -511,7 +577,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                       height: 5,
                     ),
                     MyTextFormField(
-                      controller: pricePerSession,
+                      controller: pricePerSessionController,
                       name: "Harga Perbulan/Sesi",
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -528,7 +594,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                         return null;
                       },
                       onSaved: (value) {
-                        pricePerSession.text = value!;
+                        pricePerSessionController.text = value!;
                       },
                     ),
                     SizedBox(
@@ -601,7 +667,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                 ),
                 MainButton(
                   onPressed: () {
-                    if (!_formKey.currentState!.validate()) {}
+                    registerTrainer();
                   },
                   text: "Register",
                 ),

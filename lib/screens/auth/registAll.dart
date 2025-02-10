@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:semesta_gym/screens/auth/personalTrainer/registerScreen.dart';
+import 'package:semesta_gym/screens/auth/user/registerScreen.dart';
 import 'package:semesta_gym/screens/menu.dart';
 
 class RegistAllScreen extends StatefulWidget {
@@ -30,7 +32,9 @@ class _RegistAllScreenState extends State<RegistAllScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.to(() => RegisterScreenUser());
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFFFFF00),
                     shape: RoundedRectangleBorder(
@@ -46,7 +50,9 @@ class _RegistAllScreenState extends State<RegistAllScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Get.to(() => RegisterScreenTrainer());
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFFFFF00),
                     shape: RoundedRectangleBorder(
