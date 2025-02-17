@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
 import 'package:semesta_gym/screens/menu.dart';
+import 'package:semesta_gym/screens/user/recommendation.dart';
 
 void main() {
   runApp(const MyApp());

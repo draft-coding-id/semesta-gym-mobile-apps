@@ -11,6 +11,7 @@ import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
 import 'package:semesta_gym/screens/auth/user/registerScreen.dart';
 import 'package:http/http.dart' as http;
+import 'package:semesta_gym/screens/user/recommendation.dart';
 
 class LoginScreenUser extends StatefulWidget {
   const LoginScreenUser({super.key});
@@ -50,6 +51,7 @@ class _LoginScreenUserState extends State<LoginScreenUser> {
         final responseData = jsonDecode(response.body);
         if (response.statusCode == 200) {
           User userInfo = User.fromJson(responseData["user"]);
+          String token = responseData["token"];
 
           if (userInfo.role != 'member') {
             Get.snackbar(
@@ -60,25 +62,23 @@ class _LoginScreenUserState extends State<LoginScreenUser> {
               colorText: Colors.white,
             );
           } else {
-            await RememberUserPrefs.storeUserInfo(userInfo);
+            await RememberUserPrefs.storeUserInfo(userInfo, token);
 
-            Get.snackbar(
-              "Success",
-              "Login successful!",
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.green,
-              colorText: Colors.white,
-            );
+            // Periksa apakah user sudah memilih rekomendasi
+            bool hasChosen = await RememberUserPrefs.hasChosenRecommendation(userInfo.id.toString());
 
-            Future.delayed(Duration(milliseconds: 2000), () {
+            if (!hasChosen) {
+              // Jika belum memilih rekomendasi, arahkan ke `RecommendationScreen`
+              Get.offAll(() => RecommendationScreen());
+            } else {
+              // Jika sudah, arahkan ke halaman utama
               Get.offAll(() => Layout());
-            });
+            }
           }
         } else {
           Get.snackbar(
             "Error",
-            responseData["message"] ??
-                "Email atau Password yang anda masukkan salah atau tidak terdaftar",
+            responseData["message"] ?? "Email atau Password salah atau tidak terdaftar",
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
             colorText: Colors.white,

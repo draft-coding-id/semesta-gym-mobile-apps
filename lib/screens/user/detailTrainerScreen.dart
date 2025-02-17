@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:semesta_gym/layout.dart';
+import 'package:semesta_gym/models/trainer.dart';
 
 class DetailTrainer extends StatefulWidget {
   const DetailTrainer({super.key});
@@ -12,7 +14,7 @@ class DetailTrainer extends StatefulWidget {
 class _DetailTrainerState extends State<DetailTrainer> {
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic>? trainer = Get.arguments;
+    final Trainer trainer = Get.arguments;
 
     return Scaffold(
       body: NestedScrollView(
@@ -27,7 +29,8 @@ class _DetailTrainerState extends State<DetailTrainer> {
                   child: Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: NetworkImage("${trainer?['imageUrl']}"),
+                        image: NetworkImage(
+                            "http://10.0.2.2:3000/${trainer.picture}"),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -79,7 +82,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${trainer?['name']}',
+                                '${trainer.name}',
                                 style: TextStyle(
                                     fontSize: 24, fontWeight: FontWeight.bold),
                               ),
@@ -106,7 +109,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                                   ),
                                   Spacer(),
                                   Text(
-                                    'WINGS, SHOULDER, LEG',
+                                     trainer.trainingFocus.map((e) => e.name).join(", "),
                                     style: TextStyle(fontSize: 16),
                                   ),
                                 ],
@@ -132,7 +135,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                                   ),
                                   Spacer(),
                                   Text(
-                                    '086256xxxxxx',
+                                    trainer.phone,
                                     style: TextStyle(fontSize: 16),
                                   ),
                                 ],
@@ -158,7 +161,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                                   ),
                                   Spacer(),
                                   Text(
-                                    '17.00 -21.00',
+                                    trainer.hoursOfPractice,
                                     style: TextStyle(fontSize: 16),
                                   ),
                                 ],
@@ -172,6 +175,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                       ),
                       //Description
                       Container(
+                        width: double.infinity,
                         decoration: BoxDecoration(
                             border: Border(
                                 bottom:
@@ -180,34 +184,30 @@ class _DetailTrainerState extends State<DetailTrainer> {
                           padding: const EdgeInsets.symmetric(
                               vertical: 16, horizontal: 16),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "DESKRIPSI",
-                                    style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Text(
-                                      "Number 1st Trainer paling kece dan jago dalam pembentukan otot sayap dan bahu, dan juga kaki")
-                                ],
+                              Text(
+                                "DESKRIPSI",
+                                style: TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
                               ),
+                              Text(trainer.description),
                               SizedBox(
                                 height: 32,
                               ),
-                              ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFF68989),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () {},
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFFF68989),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
                                   ),
-                                ),
-                                child: Text(
-                                  "Review",
-                                  style: TextStyle(color: Colors.white),
+                                  child: Text(
+                                    "Review",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                 ),
                               ),
                             ],
@@ -254,7 +254,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                                     vertical: 5, horizontal: 5),
                                 child: Center(
                                   child: Text(
-                                    "Rp. {price}",
+                                    "Rp. ${NumberFormat('#,###').format(trainer.price)}",
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 20,

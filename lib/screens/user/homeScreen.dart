@@ -1,7 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/cardWithStar.dart';
+import 'package:semesta_gym/models/trainer.dart';
+import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/user/detailTrainerScreen.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,27 +16,45 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Example data for the cards
-  final List<Map<String, dynamic>> trainers = [
-    {
-      "id": 1,
-      "name": "DIKSON",
-      "rating": "5.0",
-      "imageUrl": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-    },
-    {
-      "id": 2,
-      "name": "JOHN DOE",
-      "rating": "4.5",
-      "imageUrl": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-    },
-    {
-      "id": 3,
-      "name": "JANE SMITH",
-      "rating": "4.8",
-      "imageUrl": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=400",
-    },
-  ];
+  bool isLoading = true;
+  List<Trainer> trainers = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTrainers();
+  }
+
+  Future<void> fetchTrainers() async {
+    String? token = await RememberUserPrefs.readAuthToken();
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:3000/api/trainers/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+      print("token: $token");
+
+      if (response.statusCode == 200) {
+        print(response.body);
+
+        List<dynamic> data = json.decode(response.body);
+        setState(() {
+          trainers = data.map((json) => Trainer.fromJson(json)).toList();
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load trainers');
+      }
+    } catch (error) {
+      print("Error fetching trainers: $error");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,26 +81,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white,
                 ),
               ),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.9,
-                ),
-                itemCount: trainers.length,
-                itemBuilder: (context, index) {
-                  final trainer = trainers[index];
-                  return Cardwithstar(
-                    name: trainer["name"],
-                     onTap: () {
-                       Get.to(() => DetailTrainer(), arguments: trainer);
-                    },
-                    rating: trainer["rating"],
-                    imageUrl: trainer["imageUrl"],
-                  );
-                },
-              ),
+              /* GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.9,
+                      ),
+                      itemCount: trainers.length,
+                      itemBuilder: (context, index) {
+                        final trainer = trainers[index];
+                        return Cardwithstar(
+                          name: trainer["name"],
+                          onTap: () {
+                            Get.to(() => DetailTrainer(), arguments: trainer);
+                          },
+                          rating: trainer["rating"],
+                          imageUrl: trainer["imageUrl"],
+                        );
+                      },
+                    ), */
               Text(
                 "PERSONAL TRAINER",
                 style: TextStyle(
@@ -97,12 +121,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 itemBuilder: (context, index) {
                   final trainer = trainers[index];
                   return Cardwithstar(
-                    name: trainer["name"],
+                    name: trainer.name,
                     onTap: () {
                       Get.to(() => DetailTrainer(), arguments: trainer);
                     },
-                    rating: trainer["rating"],
-                    imageUrl: trainer["imageUrl"],
+                    rating: "5.0",
+                    imageUrl: "http://10.0.2.2:3000/${trainer.picture}",
                   );
                 },
               ),

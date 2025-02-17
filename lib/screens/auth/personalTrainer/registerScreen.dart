@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet_field.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
@@ -54,7 +55,6 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
       if (response.statusCode == 200) {
         List<dynamic> jsonData = json.decode(response.body);
 
-        // Check if jsonData is a list and contains valid data
         if (jsonData.isEmpty) {
           print('API returned an empty list.');
         } else {
@@ -147,6 +147,88 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
     });
 
     try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://10.0.2.2:3000/api/trainers/register/'),
+      );
+
+      // Add fields
+      request.fields['email'] = emailController.text;
+      request.fields['password'] = passwordController.text;
+      request.fields['name'] = nameController.text;
+      request.fields['phone'] = phoneNumberController.text;
+      request.fields['description'] = descriptionController.text;
+      request.fields['hoursOfPractice'] = workoutHoursController.text;
+      request.fields['price'] = pricePerSessionController.text;
+
+      // Send trainingFocus as separate fields
+      _selectedTrainingFocus.asMap().forEach((index, focus) {
+        request.fields['trainingFocus[$index]'] = focus.id.toString();
+      });
+
+      // Log the request fields for debugging
+      print("Request Fields: ${request.fields}");
+
+      // Add the image as a file
+      if (_selectedImage != null) {
+        var picture = await http.MultipartFile.fromPath(
+          'picture',
+          _selectedImage!.path,
+          contentType: MediaType('image', 'jpeg'),
+        );
+        print("File Path: ${_selectedImage!.path}"); 
+      }
+
+      // Send the request
+      var response = await request.send();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Get.snackbar(
+          "Success",
+          "Registration successful!",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+
+        Get.offAll(() => LoginScreenTrainer());
+      } else {
+        final responseData = await response.stream.bytesToString();
+        final responseJson = jsonDecode(responseData);
+        print("Response Body: $responseData");
+        Get.snackbar(
+          "Error",
+          responseJson["message"] ?? "Registration failed",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (error) {
+      Get.snackbar(
+        "Error",
+        "Something went wrong. Try again later.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  /*  Future<void> registerTrainer() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
       final response = await http.post(
         Uri.parse('http://10.0.2.2:3000/api/trainers/register/'),
         headers: {"Content-Type": "application/json"},
@@ -188,7 +270,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
         isLoading = false;
       });
     }
-  }
+  } */
 
   @override
   void initState() {

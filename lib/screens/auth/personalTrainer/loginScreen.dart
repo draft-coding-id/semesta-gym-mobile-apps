@@ -50,6 +50,7 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
         final responseData = jsonDecode(response.body);
         if (response.statusCode == 200) {
           User userInfo = User.fromJson(responseData["user"]);
+           String token = responseData["token"];
 
           if (userInfo.role != 'trainer') {
             Get.snackbar(
@@ -60,7 +61,7 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
               colorText: Colors.white,
             );
           } else {
-            await RememberUserPrefs.storeUserInfo(userInfo);
+            await RememberUserPrefs.storeUserInfo(userInfo, token);
 
             Get.snackbar(
               "Success",
