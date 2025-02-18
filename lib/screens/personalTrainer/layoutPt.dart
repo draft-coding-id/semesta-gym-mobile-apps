@@ -12,7 +12,6 @@ class LayoutPt extends StatefulWidget {
 class _LayoutPtState extends State<LayoutPt> {
   int _currentIndex = 0;
 
-  // List of screens for navigation
   final List<Widget> _screens = [
     const HomeScreenPt(),
     const ProfileScreenPt()

@@ -127,7 +127,7 @@ class _ProfileScreenPtState extends State<ProfileScreenPt> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: signOutTrainer, // Call logout function
+                      onPressed: signOutTrainer,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
