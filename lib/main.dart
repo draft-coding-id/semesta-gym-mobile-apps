@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:semesta_gym/screens/auth/loginAll.dart';
+import 'package:semesta_gym/layout.dart';
+import 'package:semesta_gym/models/user.dart';
+import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/menu.dart';
-import 'package:semesta_gym/screens/user/recommendation.dart';
+import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
+import 'package:semesta_gym/screens/splashScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,8 +16,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-        /* FutureBuilder(
+    return FutureBuilder(
       future: Future.delayed(const Duration(seconds: 3)),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
@@ -25,7 +27,21 @@ class MyApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
               useMaterial3: true,
             ),
-            home: MenuScreen(),
+            home: FutureBuilder(
+              future: RememberUserPrefs.readUserInfo(),
+              builder: (context, dataSnapShot) {
+                if (dataSnapShot.data == null) {
+                  return MenuScreen();
+                } else {
+                  User userInfo = dataSnapShot.data as User;
+                  if (userInfo.role == 'trainer') {
+                    return LayoutPt();
+                  } else {
+                    return Layout();
+                  }
+                }
+              },
+            ),
           );
         } else {
           return const GetMaterialApp(
@@ -34,8 +50,8 @@ class MyApp extends StatelessWidget {
           );
         }
       },
-    ); */
-        GetMaterialApp(
+    );
+    /* GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Semesta GYM',
       theme: ThemeData(
@@ -43,6 +59,6 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: MenuScreen(),
-    );
+    ); */
   }
 }
