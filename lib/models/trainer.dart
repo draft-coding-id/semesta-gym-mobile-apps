@@ -1,11 +1,13 @@
 import 'package:semesta_gym/models/trainingFocus.dart';
+import 'package:semesta_gym/models/user.dart';
 
 class Trainer {
   int id;
+  User user;
   String name;
   String email;
   String phone;
-  List<TrainingFocus> trainingFocus; // List of TrainingFocus objects
+  List<TrainingFocus> trainingFocus;
   String description;
   String hoursOfPractice;
   int price;
@@ -13,6 +15,7 @@ class Trainer {
 
   Trainer({
     required this.id,
+    required this.user,
     required this.name,
     required this.email,
     required this.phone,
@@ -25,14 +28,14 @@ class Trainer {
 
   factory Trainer.fromJson(Map<String, dynamic> json) => Trainer(
         id: json['id'] ?? 0,
+        user: User.fromJson(json['User'] ?? {}), 
         name: json['User']?['name'] ?? '',
         email: json['User']?['email'] ?? '',
         phone: json['User']?['phone']?.toString() ?? '',
-        // Parsing TrainingFocus list correctly
         trainingFocus: (json['TrainingFocus'] as List<dynamic>?)
                 ?.map((e) => TrainingFocus.fromJson(e))
                 .toList() ??
-            [],  // If it's empty, return an empty list
+            [],
         description: json['description'] ?? '',
         hoursOfPractice: json['hoursOfPractice'] ?? '',
         price: double.tryParse(json['price'] ?? '0.0')?.toInt() ?? 0,
@@ -41,6 +44,7 @@ class Trainer {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'user': user.toJson(),
         'name': name,
         'email': email,
         'phone': phone,
