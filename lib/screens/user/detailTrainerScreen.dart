@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/trainer.dart';
+import 'package:semesta_gym/screens/user/bookingScreen.dart';
+import 'package:semesta_gym/screens/user/reviewTrainerScreen.dart';
 
 class DetailTrainer extends StatefulWidget {
   const DetailTrainer({super.key});
@@ -197,7 +199,9 @@ class _DetailTrainerState extends State<DetailTrainer> {
                               ),
                               Center(
                                 child: ElevatedButton(
-                                  onPressed: () {},
+                                  onPressed: () {
+                                     Get.to(() => ReviewTrainerScreen(), arguments: trainer);
+                                  },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Color(0xFFF68989),
                                     shape: RoundedRectangleBorder(
@@ -281,7 +285,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Action for purchase
+                    Get.to(() => BookingScreen(), arguments: trainer);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFF68989),
@@ -299,7 +303,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Action for booking
+                   
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade400,
