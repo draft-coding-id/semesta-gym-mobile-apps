@@ -52,7 +52,7 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
         setState(() {
           bookings = data
               .map((json) => Booking.fromJson(json))
-              .where((booking) => booking.acceptedTrainer == true)
+              .where((booking) => booking.acceptedTrainer == true && booking.done == false)
               .toList();
         });
         print("Filtered Bookings: $bookings");

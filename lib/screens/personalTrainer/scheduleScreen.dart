@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
+import 'package:quickalert/quickalert.dart';
 import 'dart:convert';
 import 'package:semesta_gym/models/booking.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
+import 'package:semesta_gym/screens/personalTrainer/homeScreen.dart';
 import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
 
 class ScheduleScreenPt extends StatefulWidget {
@@ -17,14 +19,85 @@ class ScheduleScreenPt extends StatefulWidget {
 class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
   late Booking booking = Get.arguments;
 
+  Future<void> doneTrain() async {
+    try {
+      String? token = await RememberUserPrefs.readAuthToken();
+      final response = await http.put(
+        Uri.parse("http://10.0.2.2:3000/api/bookings/${booking.id}"),
+        headers: {
+          'Authorization': 'Bearer $token',
+          "Content-Type": "application/json"
+        },
+        body: jsonEncode({
+          "done": true,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        await QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          text: "Latihan telah selesai!",
+          onConfirmBtnTap: () {
+            Get.off(() => HomeScreenPt());
+          },
+        );
+      } else {
+        print("error: ${response.body}");
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          text: "Gagal mengubah status latihan",
+        );
+      }
+    } catch (e) {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        text: "Terjadi kesalahan: $e",
+      );
+    }
+  }
+
+  void showDialogDoneTrain() {
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.confirm,
+      title: "Apakah Anda Sudah yakin Latihan sudah selesai",
+      text: "Cek Terlebih dahulu",
+      textColor: Colors.red,
+      confirmBtnColor: Color(0xFFF68989),
+      onCancelBtnTap: () {
+        Get.back();
+      },
+      confirmBtnText: "Selesai",
+      showCancelBtn: true,
+      cancelBtnText: "Belum",
+      onConfirmBtnTap: () {
+        doneTrain();
+      },
+    );
+  }
+
   Future<void> updateWeekStatus(int weekNumber) async {
-    // Cek apakah minggu sebelumnya sudah selesai
-    if (weekNumber > 1 && !getWeekDone(weekNumber - 1)) {
-      Get.snackbar("Error", "Minggu ${weekNumber - 1} belum selesai!",
-          backgroundColor: Colors.redAccent, colorText: Colors.white);
+    print("Mencoba mengupdate status minggu: $weekNumber");
+    if (weekNumber > 1 && !(await getWeekDone(weekNumber - 1))) {
+      print("Minggu ${weekNumber - 1} belum selesai! Tidak bisa lanjut.");
+      await QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: "Peringatan",
+        text: "Minggu ${weekNumber - 1} belum selesai!",
+        confirmBtnColor: Color(0xFFF68989),
+        confirmBtnText: "Mengerti",
+        onConfirmBtnTap: () {
+          Get.back();
+        },
+      );
       return;
     }
 
+    print("Melanjutkan update untuk Minggu $weekNumber");
     String weekKey = "week${weekNumber}Done";
     Map<String, dynamic> updatedData = {weekKey: true};
 
@@ -43,15 +116,25 @@ class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
         setState(() {
           setWeekDone(weekNumber, true);
         });
-        Get.snackbar("Success", "Minggu $weekNumber selesai!",
-            backgroundColor: Colors.green, colorText: Colors.white);
+        print("Minggu $weekNumber berhasil diperbarui.");
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          title: "Success",
+          text: "Minggu $weekNumber selesai!",
+          confirmBtnColor: Color(0xFFF68989),
+          confirmBtnText: "Kembali ke halaman",
+          onConfirmBtnTap: () {
+            Get.back();
+          },
+        );
       } else {
-        print('respon body: ${response.body}');
+        print('Gagal memperbarui: ${response.body}');
         Get.snackbar("Error", "Gagal memperbarui status minggu $weekNumber!",
             backgroundColor: Colors.redAccent, colorText: Colors.white);
       }
     } catch (e) {
-      print('respon body: ${e}');
+      print('Terjadi kesalahan: $e');
       Get.snackbar("Error", "Terjadi kesalahan!",
           backgroundColor: Colors.redAccent, colorText: Colors.white);
     }
@@ -182,17 +265,19 @@ class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
                       SizedBox(height: 8),
                       GestureDetector(
                         onTap: () {
-                          Get.defaultDialog(
-                            title: "Konfirmasi",
-                            middleText:
-                                "Apakah Anda yakin ingin menyelesaikan ${weekNames[index]}?",
-                            textConfirm: "Ya",
-                            textCancel: "Batal",
-                            confirmTextColor: Colors.white,
-                            onConfirm: () {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.warning,
+                            title: "${weekNames[index]}",
+                            text: "Apakah Pelatihan Sudah siap ?",
+                            confirmBtnColor: Color(0xFFF68989),
+                            confirmBtnText: "Sudah",
+                            onConfirmBtnTap: () {
                               updateWeekStatus(weekNumber);
                               Get.back();
                             },
+                            cancelBtnText: "Belum",
+                            showCancelBtn: true,
                           );
                         },
                         child: Container(
@@ -248,9 +333,9 @@ class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
                     booking.week3Done &&
                     booking.week4Done)
                 ? () {
-                    // Handle latihan selesai action here
+                    showDialogDoneTrain();
                   }
-                : null, // Disable button if any week is not done
+                : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFF68989),
               shape: RoundedRectangleBorder(
