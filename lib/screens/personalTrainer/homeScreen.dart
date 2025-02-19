@@ -24,11 +24,9 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
   @override
   void initState() {
     super.initState();
-    _initializeData();
-  }
-
-  Future<void> _initializeData() async {
-    await fetchBooking();
+    Future.delayed(Duration.zero, () async {
+      await fetchBooking();
+    });
   }
 
   Future<void> fetchBooking() async {
@@ -38,31 +36,26 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
 
     try {
       String? token = await RememberUserPrefs.readAuthToken();
-      if (token == null) {
-        throw Exception("Auth token not found.");
-      }
-
-      final userId = _currentUser.user.id;
-      if (userId == null) {
-        throw Exception("User ID is null.");
-      }
-
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/bookings/trainer/$userId'),
+        Uri.parse('http://10.0.2.2:3000/api/bookings/trainer/${_currentUser.user.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       );
 
+      print("_currentUser.user.id : ${_currentUser.user.id}");
+
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
+        final List<dynamic> data =  json.decode(response.body);
+        print("Raw Bookings Data: $data");
         setState(() {
           bookings = data
               .map((json) => Booking.fromJson(json))
               .where((booking) => booking.acceptedTrainer == true)
               .toList();
         });
+        print("Filtered Bookings: $bookings");
       } else {
         throw Exception('Failed to load bookings: ${response.statusCode}');
       }
@@ -112,7 +105,7 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
                       final booking = bookings[index];
                       return GestureDetector(
                         onTap: () {
-                          Get.to(() => ScheduleScreenPt());
+                          Get.to(() => ScheduleScreenPt(), arguments: booking);
                         },
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 12),
