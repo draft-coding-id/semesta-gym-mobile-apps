@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:semesta_gym/screens/user/courseScreen.dart';
+import 'package:semesta_gym/screens/user/course/courseScreen.dart';
 import 'package:semesta_gym/screens/user/homeScreen.dart';
 import 'package:semesta_gym/screens/user/member/memberScreen.dart';
 import 'package:semesta_gym/screens/user/profileScreen.dart';

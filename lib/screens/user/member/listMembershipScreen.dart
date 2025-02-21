@@ -52,6 +52,10 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
     }
   }
 
+  //POST Register user membership
+  
+  //Payment
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

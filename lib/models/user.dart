@@ -1,4 +1,57 @@
+import 'package:semesta_gym/models/courseByUserId.dart';
+
 class User {
+  int id;
+  String name;
+  String email;
+  String password;
+  String role;
+  String phone;
+  List<String> userMemberships;
+  List<CourseByUserId> courses; // Change from CourseByUserId to List<CourseByUserId>
+
+  User(
+    this.id,
+    this.name,
+    this.email,
+    this.password,
+    this.role,
+    this.phone,
+    this.userMemberships,
+    this.courses,
+  );
+
+  factory User.fromJson(Map<String, dynamic> json) => User(
+        json['id'] as int,
+        json['name'] ?? '',
+        json['email'] ?? '',
+        json['password'] ?? '',
+        json['role'] ?? '',
+        json['phone'] ?? '',
+        (json['UserMemberships'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            [],
+        (json['Courses'] as List<dynamic>?)
+                ?.map((e) => CourseByUserId.fromJson(e))
+                .toList() ??
+            [], // Ensure courses is treated as a List
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'email': email,
+        'password': password,
+        'role': role,
+        'phone': phone,
+        'userMemberships': userMemberships,
+        'Courses': courses.map((course) => course.toJson()).toList(),
+      };
+}
+
+
+/* class User {
   int id;
   String name;
   String email;
@@ -46,4 +99,4 @@ class User {
         'userMemberships': userMemberships,
         'courses': courses,
       };
-}
+} */
