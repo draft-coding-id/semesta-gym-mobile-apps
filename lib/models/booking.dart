@@ -91,10 +91,10 @@ class Trainer {
         name: json['name'] ?? '',
         email: json['email'] ?? '',
         phone: json['phone']?.toString() ?? '',
-        description: json['Trainer']?['description'] ?? '', // Extract from Trainer
-        hoursOfPractice: json['Trainer']?['hoursOfPractice'] ?? '', // Extract from Trainer
-        price: double.tryParse(json['Trainer']?['price'] ?? '0.0')?.toInt() ?? 0, // Extract price
-        picture: json['Trainer']?['picture'] ?? '', // Extract from Trainer
+        description: json['Trainer']?['description'] ?? '',
+        hoursOfPractice: json['Trainer']?['hoursOfPractice'] ?? '', 
+        price: double.tryParse(json['Trainer']?['price'] ?? '0.0')?.toInt() ?? 0,
+        picture: json['Trainer']?['picture'] ?? '',
       );
 
   Map<String, dynamic> toJson() => {

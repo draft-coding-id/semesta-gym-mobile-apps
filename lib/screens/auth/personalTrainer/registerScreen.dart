@@ -166,17 +166,28 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
         request.fields['trainingFocus[$index]'] = focus.id.toString();
       });
 
-      // Log the request fields for debugging
       print("Request Fields: ${request.fields}");
 
-      // Add the image as a file
       if (_selectedImage != null) {
+        String fileExtension =
+            path.extension(_selectedImage!.path).toLowerCase();
+        String mimeType = 'image/jpeg';
+
+        if (fileExtension == '.png') {
+          mimeType = 'image/png';
+        } else if (fileExtension == '.jpg' || fileExtension == '.jpeg') {
+          mimeType = 'image/jpeg';
+        }
+
         var picture = await http.MultipartFile.fromPath(
           'picture',
           _selectedImage!.path,
-          contentType: MediaType('image', 'jpeg'),
+          contentType: MediaType('image', mimeType.split('/')[1]),
         );
-        print("File Path: ${_selectedImage!.path}"); 
+
+        request.files.add(picture);
+        print("File Path: ${_selectedImage!.path}");
+        print("MIME Type: $mimeType");
       }
 
       // Send the request
@@ -276,6 +287,14 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
   void initState() {
     super.initState();
     fetchTrainingFocus();
+  }
+
+  String getDisplayText() {
+    String text = _selectedTrainingFocus.isEmpty
+        ? "Pilih Fokus Pelatihan"
+        : _selectedTrainingFocus.map((e) => e.name).join(", ");
+
+    return text.length > 30 ? "${text.substring(0, 30)}..." : text;
   }
 
   @override
@@ -506,17 +525,16 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                       buttonIcon:
                           Icon(Icons.arrow_drop_down, color: Colors.black54),
                       buttonText: Text(
-                        _selectedTrainingFocus.isEmpty
-                            ? "Pilih Fokus Pelatihan"
-                            : _selectedTrainingFocus
-                                .map((e) => e.name)
-                                .join(", "),
+                        getDisplayText(),
                         style: TextStyle(
                           color: Colors.grey[500],
                           fontSize: 16,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                         ),
+                        overflow: TextOverflow
+                            .ellipsis,
+                        maxLines: 1,
                       ),
                       title: Text(
                         "Fokus Pelatihan",
@@ -547,6 +565,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                       },
                       chipDisplay: MultiSelectChipDisplay.none(),
                     ),
+
                     SizedBox(
                       height: 16,
                     ),

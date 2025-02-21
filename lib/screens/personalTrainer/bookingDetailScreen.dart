@@ -7,7 +7,7 @@ import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/models/booking.dart';
 import 'package:http/http.dart' as http;
 import 'package:semesta_gym/preferences/rememberUser.dart';
-import 'package:semesta_gym/screens/personalTrainer/homeScreen.dart';
+import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
 import 'package:semesta_gym/screens/personalTrainer/notificationScreen.dart';
 
 class BookingDetailScreen extends StatefulWidget {
@@ -50,7 +50,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           type: QuickAlertType.success,
           text: "Booking berhasil diterima!",
           onConfirmBtnTap: () {
-            Get.off(() => HomeScreenPt());
+            Get.off(() => LayoutPt());
           },
         );
       } else {

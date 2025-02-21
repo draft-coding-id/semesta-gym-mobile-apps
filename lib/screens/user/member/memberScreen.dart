@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:semesta_gym/screens/user/member/historyMembershipScreen.dart';
+import 'package:semesta_gym/screens/user/member/listMembershipScreen.dart';
 
 class MemberScreen extends StatefulWidget {
   const MemberScreen({super.key});
@@ -114,10 +117,10 @@ class _MemberScreenState extends State<MemberScreen> {
               width: 240,
               child: ElevatedButton(
                 onPressed: () {
-                  // Action for purchase
+                  Get.to(() => ListMembershipScreen());
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: /* Color(0xFFF68989) */ Color(0xFF25D366),
+                  backgroundColor: Color(0xFF25D366),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -138,7 +141,7 @@ class _MemberScreenState extends State<MemberScreen> {
               width: 160,
               child: ElevatedButton(
                 onPressed: () {
-                  // Action for booking
+                  Get.to(() => HistoryMembershipScreen());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,

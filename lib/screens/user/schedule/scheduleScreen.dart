@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:semesta_gym/components/cardWithStar.dart';
+import 'package:semesta_gym/screens/user/schedule/historyScheduleScreen.dart';
 
 class Schedulescreen extends StatefulWidget {
   const Schedulescreen({super.key});
@@ -32,28 +34,31 @@ class _SchedulescreenState extends State<Schedulescreen> {
         backgroundColor: Colors.grey.shade300,
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.9,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            children: [
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.9,
+                ),
+                itemCount: trainers.length,
+                itemBuilder: (context, index) {
+                  final trainer = trainers[index];
+                  return Cardwithstar(
+                    name: trainer["name"],
+                    onTap: () {},
+                    rating: trainer["rating"],
+                    imageUrl: trainer["imageUrl"],
+                    showRating: false,
+                  );
+                },
               ),
-              itemCount: trainers.length,
-              itemBuilder: (context, index) {
-                final trainer = trainers[index];
-                return Cardwithstar(
-                  name: trainer["name"],
-                  onTap: () {},
-                  rating: trainer["rating"],
-                  imageUrl: trainer["imageUrl"],
-                  showRating: false,
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: Padding(
@@ -61,7 +66,7 @@ class _SchedulescreenState extends State<Schedulescreen> {
         child: SizedBox(
           child: ElevatedButton(
             onPressed: () {
-              // Action for booking
+                Get.to(() => HistoryScheduleScreen());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,

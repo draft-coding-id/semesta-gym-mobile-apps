@@ -4,6 +4,7 @@ import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/menu.dart';
+import 'package:semesta_gym/screens/personalTrainer/editProfileScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
@@ -110,7 +111,7 @@ class _ProfileScreenPtState extends State<ProfileScreenPt> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigate to Edit Profile Screen
+                        Get.to(() => EditProfileScreen());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,

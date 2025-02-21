@@ -8,7 +8,7 @@ class RememberUserPrefs {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String userJsonData = jsonEncode(userInfo.toJson());
     await preferences.setString("currentUser", userJsonData);
-    await preferences.setString("authToken", token); // Save the token
+    await preferences.setString("authToken", token);
   }
 
   static Future<User?> readUserInfo() async {
@@ -49,6 +49,23 @@ class RememberUserPrefs {
     return preferences.getBool("recommendationChosen_$userId") ?? false;
   }
 }
+
+/* static Future<void> setRecommendation(String userId, List<int> recommendations) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  String encodedList = jsonEncode(recommendations);
+  await preferences.setString("recommendations_$userId", encodedList);
+}
+
+static Future<List<int>> getRecommendations(String userId) async {
+  SharedPreferences preferences = await SharedPreferences.getInstance();
+  String? encodedList = preferences.getString("recommendations_$userId");
+
+  if (encodedList != null) {
+    List<dynamic> decodedList = jsonDecode(encodedList);
+    return decodedList.map((e) => e as int).toList();
+  }
+  return [];
+} */
 
 
 /* class RememberUserPrefs {

@@ -6,7 +6,6 @@ import 'package:quickalert/quickalert.dart';
 import 'dart:convert';
 import 'package:semesta_gym/models/booking.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
-import 'package:semesta_gym/screens/personalTrainer/homeScreen.dart';
 import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
 
 class ScheduleScreenPt extends StatefulWidget {
@@ -39,7 +38,7 @@ class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
           type: QuickAlertType.success,
           text: "Latihan telah selesai!",
           onConfirmBtnTap: () {
-            Get.off(() => HomeScreenPt());
+            Get.off(() => LayoutPt());
           },
         );
       } else {

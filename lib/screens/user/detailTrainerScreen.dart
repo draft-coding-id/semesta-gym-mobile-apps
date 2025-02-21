@@ -93,6 +93,8 @@ class _DetailTrainerState extends State<DetailTrainer> {
                               ),
                               //Fokus
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
@@ -110,13 +112,21 @@ class _DetailTrainerState extends State<DetailTrainer> {
                                     ],
                                   ),
                                   Spacer(),
-                                  Text(
-                                     trainer.trainingFocus.map((e) => e.name).join(", "),
-                                    style: TextStyle(fontSize: 16),
+                                  Flexible(
+                                    child: Text(
+                                      trainer.trainingFocus
+                                          .map((e) => e.name)
+                                          .join(", "),
+                                      style: TextStyle(fontSize: 16),
+                                      softWrap: true,
+                                      overflow: TextOverflow.visible,
+                                    ),
                                   ),
                                 ],
                               ),
-
+                              SizedBox(
+                                height: 12,
+                              ),
                               // No. hp
                               Row(
                                 children: [
@@ -142,7 +152,9 @@ class _DetailTrainerState extends State<DetailTrainer> {
                                   ),
                                 ],
                               ),
-
+                              SizedBox(
+                                height: 12,
+                              ),
                               // Jadwal
                               Row(
                                 children: [
@@ -200,7 +212,8 @@ class _DetailTrainerState extends State<DetailTrainer> {
                               Center(
                                 child: ElevatedButton(
                                   onPressed: () {
-                                     Get.to(() => ReviewTrainerScreen(), arguments: trainer);
+                                    Get.to(() => ReviewTrainerScreen(),
+                                        arguments: trainer);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Color(0xFFF68989),
@@ -302,9 +315,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
               SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () {
-                   
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade400,
                     shape: RoundedRectangleBorder(
