@@ -60,7 +60,7 @@ class Booking {
       createdAt: DateTime.parse(json['createdAt']),
       updatedAt: DateTime.parse(json['updatedAt']),
       member: User.fromJson(json['member']),
-      trainer: Trainer.fromJson(json['trainer']), // Change from User to Trainer
+      trainer: Trainer.fromJson(json['trainer']),
     );
   }
 }

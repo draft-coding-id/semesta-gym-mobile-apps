@@ -7,6 +7,7 @@ import 'package:semesta_gym/models/trainer.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/user/detailTrainerScreen.dart';
 import 'package:http/http.dart' as http;
+import 'package:semesta_gym/screens/user/notification/notificationScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -66,6 +67,14 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.grey.shade300,
+        actions: [
+          IconButton(
+            onPressed: () {
+              Get.to(() => NotificationScreen());
+            },
+            icon: const Icon(Icons.notifications),
+          )
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(

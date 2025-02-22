@@ -8,7 +8,7 @@ class User {
   String role;
   String phone;
   List<String> userMemberships;
-  List<CourseByUserId> courses; // Change from CourseByUserId to List<CourseByUserId>
+  List<CourseByUserId> courses;
 
   User(
     this.id,
@@ -35,7 +35,7 @@ class User {
         (json['Courses'] as List<dynamic>?)
                 ?.map((e) => CourseByUserId.fromJson(e))
                 .toList() ??
-            [], // Ensure courses is treated as a List
+            [],
       );
 
   Map<String, dynamic> toJson() => {

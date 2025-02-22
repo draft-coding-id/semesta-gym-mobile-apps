@@ -312,7 +312,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                   ),
                 ),
               ),
-              SizedBox(width: 16),
+              /* SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {},
@@ -327,7 +327,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
-              ),
+              ), */
             ],
           ),
         ),

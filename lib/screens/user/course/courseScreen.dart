@@ -21,14 +21,14 @@ class _CourseScreenState extends State<CourseScreen> {
   final CurrentUser currentUser = Get.put(CurrentUser());
 
   List<TrainingFocus> trainingFocus = [];
-  late User user;
+ /*  late User user; */
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _fetchTrainingFocus();
-    _fetchCoursesByUserId();
+    /* _fetchCoursesByUserId(); */
   }
 
   Future<void> _fetchTrainingFocus() async {
@@ -53,7 +53,7 @@ class _CourseScreenState extends State<CourseScreen> {
     }
   }
 
-  Future<void> _fetchCoursesByUserId() async {
+/*   Future<void> _fetchCoursesByUserId() async {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.get(
@@ -80,7 +80,8 @@ class _CourseScreenState extends State<CourseScreen> {
       Get.snackbar("Error", "Failed to load user data");
     }
   }
-
+ */
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,9 +132,11 @@ class _CourseScreenState extends State<CourseScreen> {
                                 vertical: 5, horizontal: 5),
                             child: Center(
                               child: Text(
-                                 DateFormat('dd-MM-yyyy').format(DateTime.parse(user.courses[0].endDate)),
+                                 "-",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
+
+                                  
                                   fontSize: 16,
                                 ),
                               ),
