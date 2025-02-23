@@ -4,6 +4,7 @@ import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/menu.dart';
+import 'package:semesta_gym/screens/user/profile/editProfileScreen.dart';
 
 class Profilescreen extends StatefulWidget {
   const Profilescreen({super.key});
@@ -98,7 +99,7 @@ class _ProfilescreenState extends State<Profilescreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Action for booking
+                          Get.to(() => EditProfileScreen());
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,

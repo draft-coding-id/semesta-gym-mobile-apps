@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 class MyTextFormField extends StatelessWidget {
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final String name;
   final dynamic validator;
   final dynamic onSaved;
@@ -10,16 +11,20 @@ class MyTextFormField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final int? minLines;
   final int? maxLines;
+  final String? value;
+  final dynamic onChange;
 
   MyTextFormField({
-    required this.controller,
+    this.controller,
     required this.name,
     required this.validator,
-    required this.onSaved,
+    this.onSaved,
     this.keyboardType = TextInputType.text,
     this.inputFormatters,
     this.minLines,
     this.maxLines,
+    this.value,
+    this.onChange
   });
 
   @override
@@ -27,6 +32,8 @@ class MyTextFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       validator: validator,
+      initialValue: value,
+      onChanged: onChange,
       onSaved: onSaved,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
