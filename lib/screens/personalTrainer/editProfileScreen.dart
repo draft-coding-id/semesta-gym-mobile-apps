@@ -9,13 +9,17 @@ import 'package:image_picker/image_picker.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/components/myTextFormField.dart';
+import 'package:semesta_gym/models/trainer.dart';
 import 'package:semesta_gym/models/trainingFocus.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet_field.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 import 'package:semesta_gym/preferences/currentUser.dart';
+import 'package:semesta_gym/preferences/rememberUser.dart';
+import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
 import 'package:semesta_gym/screens/personalTrainer/profileScreen.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -27,6 +31,8 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final CurrentUser _currentUser = Get.put(CurrentUser());
+  /* List<Trainer> trainers = []; */
+  Trainer? trainer;
   List<TrainingFocus> _trainingFocusList = [];
   List<TrainingFocus> _selectedTrainingFocus = [];
   bool _isLoading = true;
@@ -42,6 +48,154 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final ImagePicker _picker = ImagePicker();
 
   bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTrainingFocus();
+    fetchTrainerByUserId();
+  }
+
+  Future<void> fetchTrainingFocus() async {
+    try {
+      final response =
+          await http.get(Uri.parse('http://10.0.2.2:3000/api/training-focus'));
+
+      print('Response Status: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        List<dynamic> jsonData = json.decode(response.body);
+
+        if (jsonData.isEmpty) {
+          print('API returned an empty list.');
+        } else {
+          print('First item in JSON: ${jsonData[0]}');
+        }
+
+        setState(() {
+          _trainingFocusList = jsonData
+              .map((data) {
+                try {
+                  return TrainingFocus.fromJson(data);
+                } catch (e) {
+                  print('Error parsing JSON: $e, Data: $data');
+                  return null;
+                }
+              })
+              .whereType<TrainingFocus>()
+              .toList(); // Remove any null values
+
+          _isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load training focus data');
+      }
+    } catch (error) {
+      print('Error fetching training focus: $error');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // all trainer but filterin by userId
+  Future<void> fetchTrainerByUserId() async {
+    String? token = await RememberUserPrefs.readAuthToken();
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:3000/api/trainers/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print(response.body);
+
+        var data = json.decode(response.body);
+
+        Trainer? foundTrainer =
+            data.map((json) => Trainer.fromJson(json)).firstWhere(
+                  (trainer) => trainer.user.id == _currentUser.user.id,
+                  orElse: () => null,
+                );
+        if (foundTrainer != null) {
+          setState(() {
+            trainer = foundTrainer;
+            isLoading = false;
+          });
+
+          // Fetch the single trainer **after** the trainer is found
+          fetchSingleTrainer(foundTrainer.id);
+        } else {
+          print("Trainer not found");
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        throw Exception('Failed to load trainer');
+      }
+    } catch (error) {
+      print("Error fetching trainer: $error");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  //fetch trainer by id http://10.0.2.2t:3000/api/trainers/7
+  Future<void> fetchSingleTrainer(int? trainerId) async {
+    if (trainerId == null || trainerId == 0) {
+      print("Invalid trainer ID");
+      return;
+    }
+
+    String? token = await RememberUserPrefs.readAuthToken();
+
+    try {
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:3000/api/trainers/$trainerId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print(response.body);
+
+        Map<String, dynamic> data = json.decode(response.body);
+        Trainer fetchedTrainer = Trainer.fromJson(data);
+
+        setState(() {
+          trainer = fetchedTrainer;
+          isLoading = false;
+
+          // Populate form fields
+          nameController.text = trainer?.name ?? '';
+          emailController.text = trainer?.email ?? '';
+          phoneNumberController.text = trainer?.phone ?? '';
+          descriptionController.text = trainer?.description ?? '';
+          workoutHoursController.text =
+              trainer?.hoursOfPractice.toString() ?? '';
+          pricePerSessionController.text = trainer?.price.toString() ?? '';
+
+          _selectedTrainingFocus = fetchedTrainer.trainingFocus.toList() ?? [];
+        });
+      } else {
+        throw Exception('Failed to load trainer');
+      }
+    } catch (error) {
+      print("Error fetching trainer: $error");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final XFile? pickedFile = await _picker.pickImage(source: source);
@@ -93,7 +247,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Future<void> registerTrainer() async {
+  Future<void> updateTrainer() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -102,11 +256,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       isLoading = true;
     });
 
+    String? token = await RememberUserPrefs.readAuthToken();
+
     try {
       var request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://10.0.2.2:3000/api/trainers/'),
+        Uri.parse('http://10.0.2.2:3000/api/trainers/${trainer?.id ?? 0}'),
       );
+      request.headers.addAll({
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
 
       request.fields['email'] = emailController.text;
       request.fields['name'] = nameController.text;
@@ -127,20 +287,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           _selectedImage!.path,
           contentType: MediaType('image', 'jpeg'),
         );
-        print("File Path: ${_selectedImage!.path}"); 
+        print("File Path: ${_selectedImage!.path}");
       }
       var response = await request.send();
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar(
-          "Success",
-          "Update data successful!",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        RememberUserPrefs.updateUserInfo(_currentUser.user).then((value) async {
+          _currentUser.user.name = nameController.text;
+          _currentUser.user.email = emailController.text;
+          _currentUser.user.phone = phoneNumberController.text;
 
-        Get.offAll(() => ProfileScreenPt());
+          await RememberUserPrefs.updateUserInfo(_currentUser.user);
+
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.success,
+            confirmBtnText: "Ok",
+            showConfirmBtn: true,
+            onConfirmBtnTap: () {
+              Get.offAll(() => LayoutPt());
+            },
+            confirmBtnColor: Color(0xFFF68989),
+            title: "Success",
+            text: "Data berhasil di update.",
+          );
+        });
       } else {
         final responseData = await response.stream.bytesToString();
         final responseJson = jsonDecode(responseData);
@@ -166,6 +337,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         isLoading = false;
       });
     }
+  }
+
+  String getDisplayText(List<TrainingFocus> selectedTrainingFocus) {
+    String text = _selectedTrainingFocus.isEmpty
+        ? "Pilih Fokus Pelatihan"
+        : _selectedTrainingFocus.map((e) => e.name).join(", ");
+
+    return text.length > 30 ? "${text.substring(0, 30)}..." : text;
   }
 
   @override
@@ -206,7 +385,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   MyTextFormField(
                     controller: nameController,
-                    name: "Update Nama",
+                    name: 'name',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Please enter your name/username";
@@ -216,8 +395,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       }
                       return null;
                     },
-                    onSaved: (value) {
-                      nameController.text = value!;
+                    onChange: (value) {
+                      trainer?.name = value;
                     },
                   ),
                   SizedBox(
@@ -310,18 +489,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                         },
                                       ),
                                     )
-                                  : Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(Icons.camera_alt,
-                                            size: 40, color: Colors.grey[700]),
-                                        SizedBox(height: 5),
-                                        Text("Tap to upload photo",
-                                            style: TextStyle(
-                                                color: Colors.grey[700])),
-                                      ],
-                                    ),
+                                  : trainer?.picture != null &&
+                                          trainer!.picture!.isNotEmpty
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          child: Image.network(
+                                            "http://10.0.2.2:3000/${trainer!.picture}",
+                                            width: double.infinity,
+                                            height: 150,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              return Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Icon(Icons.error,
+                                                      size: 40,
+                                                      color: Colors.red),
+                                                  SizedBox(height: 5),
+                                                  Text("Failed to load image",
+                                                      style: TextStyle(
+                                                          color: Colors.red)),
+                                                ],
+                                              );
+                                              ;
+                                            },
+                                          ),
+                                        )
+                                      : Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.camera_alt,
+                                                size: 40,
+                                                color: Colors.grey[700]),
+                                            SizedBox(height: 5),
+                                            Text("Tap to upload photo",
+                                                style: TextStyle(
+                                                    color: Colors.grey[700])),
+                                          ],
+                                        ),
                             ),
                           ),
                           if (_selectedImage != null) ...[
@@ -390,9 +599,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     buttonText: Text(
                       _selectedTrainingFocus.isEmpty
                           ? "Pilih Fokus Pelatihan"
-                          : _selectedTrainingFocus
-                              .map((e) => e.name)
-                              .join(", "),
+                          : getDisplayText(_selectedTrainingFocus),
                       style: TextStyle(
                         color: Colors.grey[500],
                         fontSize: 16,
@@ -405,13 +612,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    items: _trainingFocusList.isNotEmpty
-                        ? _trainingFocusList
-                            .map((focus) => MultiSelectItem<TrainingFocus>(
-                                focus, focus.name))
-                            .toList()
-                        : [],
-                    initialValue: _selectedTrainingFocus,
+                    items: _trainingFocusList
+                        .map((focus) =>
+                            MultiSelectItem<TrainingFocus>(focus, focus.name))
+                        .toList(),
+                    initialValue: _selectedTrainingFocus
+                        .map((selected) => _trainingFocusList.firstWhere(
+                            (focus) => focus.id == selected.id,
+                            orElse: () => selected))
+                        .toList(),
                     validator: (values) {
                       if (values == null || values.isEmpty) {
                         return "Pilih setidaknya satu fokus pelatihan";
@@ -425,7 +634,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     },
                     onSaved: (values) {
                       _selectedTrainingFocus =
-                          values?.cast<TrainingFocus>() ?? [];
+                          _selectedTrainingFocus.toSet().toList();
                     },
                     chipDisplay: MultiSelectChipDisplay.none(),
                   ),
@@ -557,11 +766,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       pricePerSessionController.text = value!;
                     },
                   ),
-                  SizedBox(height: 16,),
+                  SizedBox(
+                    height: 16,
+                  ),
                   MainButton(
-                    onPressed: () {
-                      
-                    },
+                    onPressed: updateTrainer,
                     text: "Confirm Perubahan",
                   ),
                 ],

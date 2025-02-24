@@ -76,6 +76,7 @@ class _LoginScreenUserState extends State<LoginScreenUser> {
             }
           }
         } else {
+          print(response.body);
           Get.snackbar(
             "Error",
             responseData["message"] ?? "Email atau Password salah atau tidak terdaftar",

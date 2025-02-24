@@ -13,33 +13,33 @@ class Trainer {
   int price;
   String picture;
 
-  Trainer({
-    required this.id,
-    required this.user,
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.trainingFocus,
-    required this.description,
-    required this.hoursOfPractice,
-    required this.price,
-    required this.picture,
-  });
+  Trainer(
+    this.id,
+    this.user,
+    this.name,
+    this.email,
+    this.phone,
+    this.trainingFocus,
+    this.description,
+    this.hoursOfPractice,
+    this.price,
+    this.picture,
+  );
 
   factory Trainer.fromJson(Map<String, dynamic> json) => Trainer(
-        id: json['id'] ?? 0,
-        user: User.fromJson(json['User'] ?? {}), 
-        name: json['User']?['name'] ?? '',
-        email: json['User']?['email'] ?? '',
-        phone: json['User']?['phone']?.toString() ?? '',
-        trainingFocus: (json['TrainingFocus'] as List<dynamic>?)
+        json['id'] ?? 0,
+        User.fromJson(json['User'] ?? {}), 
+        json['User']?['name'] ?? '',
+        json['User']?['email'] ?? '',
+        json['User']?['phone']?.toString() ?? '',
+        (json['TrainingFocus'] as List<dynamic>?)
                 ?.map((e) => TrainingFocus.fromJson(e))
                 .toList() ??
             [],
-        description: json['description'] ?? '',
-        hoursOfPractice: json['hoursOfPractice'] ?? '',
-        price: double.tryParse(json['price'] ?? '0.0')?.toInt() ?? 0,
-        picture: json['picture'] ?? '',
+        json['description'] ?? '',
+        json['hoursOfPractice'] ?? '',
+        double.tryParse(json['price'] ?? '0.0')?.toInt() ?? 0,
+        json['picture'] ?? '',
       );
 
   Map<String, dynamic> toJson() => {

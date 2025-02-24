@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/components/myTextFormField.dart';
 import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/user.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
-import 'package:semesta_gym/screens/user/profile/profileScreen.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -28,6 +28,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController phoneNumberController = TextEditingController();
 
   bool isLoading = false;
+
+  /* Future<void> logout() async {
+    String? token =
+        await RememberUserPrefs.readAuthToken();
+
+    try {
+      final response = await http.post(
+        Uri.parse(
+            'http://10.0.2.2:3000/api/auth/logout'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("Logout successful");
+
+        RememberUserPrefs.removeUserInfo().then((value) {
+          Get.offAll(() => LoginScreenUser());
+        });
+      } else {
+        print("Logout failed: ${response.statusCode} - ${response.body}");
+      }
+    } catch (error) {
+      print("Error during logout: $error");
+    }
+  } */
 
   Future updateUser(User user) async {
     if (!_formKey.currentState!.validate()) {
@@ -51,33 +79,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         body: jsonEncode({
           "name": user.name,
           "email": user.email,
-          "password" : "123123",
           "role": _currentUser.user.role,
           "phone": user.phone,
         }),
       );
 
-      print(_currentUser.user.password);
-
       final responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar("Success", "Update data successful!",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white);
-
-        Get.offAll(() => Layout());
-
         RememberUserPrefs.updateUserInfo(_currentUser.user).then((value) async {
           _currentUser.user.name = user.name;
           _currentUser.user.email = user.email;
-          _currentUser.user.password = "123123";
           _currentUser.user.role = _currentUser.user.role;
           _currentUser.user.phone = user.phone;
 
           await RememberUserPrefs.updateUserInfo(_currentUser.user);
-          Get.off(() => Layout());
+
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.success,
+            confirmBtnText: "Ok",
+            showConfirmBtn: true,
+            onConfirmBtnTap: () {
+                Get.offAll(() => Layout());
+            },
+            confirmBtnColor: Color(0xFFF68989),
+            title: "Success",
+            text: "Data berhasil di update.",
+          );
         });
       } else {
         print("Response body: ${response.body}");

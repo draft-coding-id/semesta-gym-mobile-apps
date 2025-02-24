@@ -4,7 +4,6 @@ class User {
   int id;
   String name;
   String email;
-  String password;
   String role;
   String phone;
   List<String> userMemberships;
@@ -14,7 +13,6 @@ class User {
     this.id,
     this.name,
     this.email,
-    this.password,
     this.role,
     this.phone,
     this.userMemberships,
@@ -25,7 +23,6 @@ class User {
         json['id'] as int,
         json['name'] ?? '',
         json['email'] ?? '',
-        json['password'] ?? '',
         json['role'] ?? '',
         json['phone'] ?? '',
         (json['UserMemberships'] as List<dynamic>?)
@@ -42,14 +39,12 @@ class User {
         'id': id,
         'name': name,
         'email': email,
-        'password': password,
         'role': role,
         'phone': phone,
         'userMemberships': userMemberships,
         'Courses': courses.map((course) => course.toJson()).toList(),
       };
 }
-
 
 /* class User {
   int id;
