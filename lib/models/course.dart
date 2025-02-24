@@ -26,7 +26,7 @@ class Course {
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       numberOfPractices: json['numberOfPractices'] ?? 0,
-      picture: json['picture'],
+      picture: json['picture'] ?? '',
       trainingFocus: TrainingFocus.fromJson(json['User'] ?? {}), 
     );
   }

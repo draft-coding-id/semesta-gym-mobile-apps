@@ -10,6 +10,7 @@ class CurrentTrainer extends GetxController {
     '',
     '',
     '',
+    '',
     [],
     '',
     '',
@@ -28,6 +29,7 @@ class CurrentTrainer extends GetxController {
       _currentTrainer.value = Trainer(
         0,
         User(0, '', '', '', '', [], []),
+        '',
         '',
         '',
         '',

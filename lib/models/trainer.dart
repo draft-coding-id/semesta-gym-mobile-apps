@@ -7,6 +7,7 @@ class Trainer {
   String name;
   String email;
   String phone;
+  String rating;
   List<TrainingFocus> trainingFocus;
   String description;
   String hoursOfPractice;
@@ -19,6 +20,7 @@ class Trainer {
     this.name,
     this.email,
     this.phone,
+    this.rating,
     this.trainingFocus,
     this.description,
     this.hoursOfPractice,
@@ -32,6 +34,7 @@ class Trainer {
         json['User']?['name'] ?? '',
         json['User']?['email'] ?? '',
         json['User']?['phone']?.toString() ?? '',
+        json['rating'] ?? '',
         (json['TrainingFocus'] as List<dynamic>?)
                 ?.map((e) => TrainingFocus.fromJson(e))
                 .toList() ??

@@ -6,21 +6,21 @@ class CourseByUserId {
   String startDate;
   String endDate;
 
-  CourseByUserId({
-    required this.id,
-    required this.userId,
-    required this.price,
-    required this.startDate,
-    required this.endDate,
-  });
+  CourseByUserId(
+     this.id,
+     this.userId,
+     this.price,
+     this.startDate,
+     this.endDate,
+  );
 
   factory CourseByUserId.fromJson(Map<String, dynamic> json) {
     return CourseByUserId(
-      id: json['id'] ?? 0,
-      userId: json['userId'] ?? 0,
-      price: json['price'] ?? '',
-      startDate: json['startDate'] ?? '',
-      endDate: json['endDate'] ?? '',
+      json['id'] ?? 0,
+      json['userId'] ?? 0,
+      json['price'] ?? '',
+      json['startDate'] ?? '',
+      json['endDate'] ?? '',
     );
   }
 

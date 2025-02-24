@@ -20,7 +20,6 @@ import 'package:http/http.dart' as http;
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
-import 'package:semesta_gym/screens/personalTrainer/profileScreen.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
