@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/trainer.dart';
 import 'package:semesta_gym/screens/user/bookingScreen.dart';
 import 'package:semesta_gym/screens/user/reviewTrainerScreen.dart';

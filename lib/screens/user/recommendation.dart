@@ -207,9 +207,21 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
     if (userInfo != null) {
       await RememberUserPrefs.setRecommendationChosen(
           userInfo!.id.toString(), true);
+      await RememberUserPrefs.setRecommendation(
+          userInfo!.id.toString(), selectedIds);
       Get.offAll(() => const Layout());
     } else {
       Get.snackbar("Error", "User data not found.");
     }
   }
+
+  /* Future<void> _confirmRecommendation() async {
+    if (userInfo != null) {
+      await RememberUserPrefs.setRecommendationChosen(
+          userInfo!.id.toString(), true);
+      Get.offAll(() => const Layout());
+    } else {
+      Get.snackbar("Error", "User data not found.");
+    }
+  } */
 }
