@@ -89,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.grey.shade300,
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             onPressed: () {

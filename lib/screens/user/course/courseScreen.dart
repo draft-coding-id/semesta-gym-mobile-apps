@@ -28,7 +28,7 @@ class _CourseScreenState extends State<CourseScreen> {
     super.initState();
     Future.delayed(Duration.zero, () async {
       await fetchCourseByUserId();
-      await _fetchTrainingFocus();
+      await fetchTrainingFocus();
     });
   }
 
@@ -72,7 +72,7 @@ class _CourseScreenState extends State<CourseScreen> {
     }
   }
 
-  Future<void> _fetchTrainingFocus() async {
+  Future<void> fetchTrainingFocus() async {
     try {
       final response =
           await http.get(Uri.parse('http://10.0.2.2:3000/api/training-focus'));

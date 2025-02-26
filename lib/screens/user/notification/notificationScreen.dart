@@ -8,6 +8,7 @@ import 'package:semesta_gym/models/booking.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:http/http.dart' as http;
+import 'package:semesta_gym/screens/user/notification/payBookingScreen.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -73,7 +74,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         centerTitle: true,
         leading: IconButton(
           onPressed: () {
-            Get.back();
+            Get.off(() => Layout());
           },
           icon: Icon(Icons.arrow_back_ios_new_rounded),
         ),
@@ -104,7 +105,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             itemCount: bookings.length,
                             itemBuilder: (context, index) {
                               final booking = bookings[index];
-                              return Column(children: [
+                              return Column(
+                                children: [
                                 GestureDetector(
                                   onTap: () {
                                     if ( booking.acceptedTrainer != false && booking.reasonRejection == null) {
@@ -115,7 +117,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                           text: "Silahkan Lakukan Pembayaran",
                                           confirmBtnText: "Lanjut Payment",
                                           onConfirmBtnTap: () {
-                                            Get.back();
+                                            Get.to(() => PayBookingScreen(), arguments: booking);
                                           },
                                           showCancelBtn: false);
                                     } else if (booking.acceptedTrainer == false && booking.reasonRejection != null
@@ -263,6 +265,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                     ),
                                   ),
                                 ),
+                                SizedBox(height: 12,),
                               ]);
                             })
                       ],

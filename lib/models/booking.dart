@@ -19,6 +19,7 @@ class Booking {
   final DateTime updatedAt;
   final User member;
   final Trainer trainer;
+  final String? endDate;
 
   Booking({
     required this.id,
@@ -35,6 +36,7 @@ class Booking {
     required this.acceptedTrainer,
     required this.done,
     this.reasonRejection,
+    this.endDate,
     required this.createdAt,
     required this.updatedAt,
     required this.member,
@@ -54,6 +56,7 @@ class Booking {
       week3Done: json['week3Done'],
       week4Date: DateTime.parse(json['week4Date']),
       week4Done: json['week4Done'],
+      endDate: json['endDate'] ?? '',
       acceptedTrainer: json['acceptedTrainer'],
       done: json['done'],
       reasonRejection: json['reasonRejection'],
