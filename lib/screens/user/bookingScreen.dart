@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/components/dateTextFormField.dart';
+import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/trainer.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:http/http.dart' as http;
@@ -64,6 +65,10 @@ class _BookingScreenState extends State<BookingScreen> {
             "week2Date": convertToISO8601(week2DateController.text),
             "week3Date": convertToISO8601(week3DateController.text),
             "week4Date": convertToISO8601(week4DateController.text),
+            "endDate": DateTime.now()
+              .toUtc()
+              .add(Duration(days: 30))
+              .toIso8601String()
           }),
         );
 
@@ -74,7 +79,7 @@ class _BookingScreenState extends State<BookingScreen> {
             context: context,
             type: QuickAlertType.info,
             confirmBtnText: "Balik Ke Halaman",
-            onConfirmBtnTap: () => Get.back(),
+            onConfirmBtnTap: () => Get.offAll(() => Layout(index: 0,)),
             title: "Booking sedang di ajukan",
             text: "Harap untuk tidak melakukan Payment Sebelum di Approve",
             textColor: Colors.red,
@@ -138,7 +143,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         color: innerBoxIsScrolled ? Colors.black : Colors.white,
                       ),
                       onPressed: () {
-                        Get.back();
+                        Get.to(() => Layout(index: 0,));
                       },
                     ),
                   ),

@@ -37,7 +37,7 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/reviews/${booking.trainerId}'),
+        Uri.parse('http://10.0.2.2:3000/api/reviews/${booking.trainer.trainerId}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -47,7 +47,6 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
 
-        // Find the first review that matches the booking.id
         Review singleReview = data
             .map((json) => Review.fromJson(json))
             .firstWhere((review) => review.bookingId == booking.id,
@@ -331,7 +330,7 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
         },
         body: jsonEncode({
           "memberId": currentUser.user.id,
-          "trainerId": booking.trainer.id,
+          "trainerId": booking.trainer.trainerId,
           "bookingId": booking.id,
           "rating": rating,
           "comment": commentController.text
@@ -405,7 +404,7 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
                         color: innerBoxIsScrolled ? Colors.black : Colors.white,
                       ),
                       onPressed: () {
-                        Get.off(() => Layout());
+                        Get.offAll(() => Layout(index: 1,));
                       },
                     ),
                   ),
@@ -604,71 +603,3 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
     );
   }
 }
-
-  /*  void showReview() {
-    int rating = 0;
-
-    QuickAlert.show(
-      context: context,
-      type: QuickAlertType.info,
-      title: "Bagaimana Latihan Anda Dengan Trainer",
-      widget: StatefulBuilder(
-        builder: (context, setState) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              const Text(
-                "Berikan Rating Anda",
-                style: TextStyle(fontSize: 20),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(5, (index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        rating = (index + 1);
-                      });
-                    },
-                    child: Icon(
-                      Icons.star,
-                      size: MediaQuery.of(context).size.width * 0.11,
-                      color: index < rating ? Colors.yellow : Colors.grey,
-                    ),
-                  );
-                }),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                "Review",
-                style: TextStyle(fontSize: 20),
-              ),
-              TextFormField(
-                controller: commentController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-            ],
-          );
-        },
-      ),
-      textColor: Colors.red,
-      confirmBtnColor: const Color(0xFFF68989),
-      onCancelBtnTap: () {
-        Get.back();
-      },
-      confirmBtnText: "Rate",
-      showCancelBtn: true,
-      cancelBtnText: "Tidak",
-      onConfirmBtnTap: () {
-        postReview(rating);
-        Get.back();
-      },
-    );
-  }
- */
-  

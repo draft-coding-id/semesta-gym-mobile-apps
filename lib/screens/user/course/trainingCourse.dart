@@ -185,7 +185,7 @@ class _TrainingCourseScreenState extends State<TrainingCourseScreen> {
                         text:
                             "Anda telah menyelesaikan course!\nAnda juga masih bisa menggunakan course ini selama masa berlaku! ",
                         onConfirmBtnTap: () {
-                          Get.offAll(() => Layout());
+                          Get.offAll(() => Layout(index: 3,));
                         },
                         confirmBtnColor: Colors.blue);
                   }

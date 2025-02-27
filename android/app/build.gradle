@@ -28,6 +28,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -41,4 +42,10 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation 'com.midtrans:uikit:1.28.0'
+    implementation "androidx.multidex:multidex:2.0.1"
+    implementation 'androidx.appcompat:appcompat:1.4.1'
 }

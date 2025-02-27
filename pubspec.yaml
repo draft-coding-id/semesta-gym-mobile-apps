@@ -44,6 +44,7 @@ dependencies:
   path: ^1.9.0
   http_parser: ^4.1.2
   intl: ^0.18.0
+  midtrans_sdk: ^0.4.0
 
 dev_dependencies:
   flutter_test:

@@ -69,7 +69,8 @@ class Booking {
 }
 
 class Trainer {
-  int id;
+  int? id;
+  int? trainerId;
   String name;
   String email;
   String phone;
@@ -78,30 +79,33 @@ class Trainer {
   int price;
   String picture;
 
-  Trainer({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.phone,
-    required this.description,
-    required this.hoursOfPractice,
-    required this.price,
-    required this.picture,
-  });
+  Trainer(
+    this.id,
+    this.trainerId,
+    this.name,
+    this.email,
+    this.phone,
+    this.description,
+    this.hoursOfPractice,
+    this.price,
+    this.picture,
+  );
 
   factory Trainer.fromJson(Map<String, dynamic> json) => Trainer(
-        id: json['id'] ?? 0,
-        name: json['name'] ?? '',
-        email: json['email'] ?? '',
-        phone: json['phone']?.toString() ?? '',
-        description: json['Trainer']?['description'] ?? '',
-        hoursOfPractice: json['Trainer']?['hoursOfPractice'] ?? '', 
-        price: double.tryParse(json['Trainer']?['price'] ?? '0.0')?.toInt() ?? 0,
-        picture: json['Trainer']?['picture'] ?? '',
+        json['id'] ?? 0,
+        json['trainerId'] ?? 0,
+        json['name'] ?? '',
+        json['email'] ?? '',
+        json['phone']?.toString() ?? '',
+        json['Trainer']?['description'] ?? '',
+        json['Trainer']?['hoursOfPractice'] ?? '', 
+        double.tryParse(json['Trainer']?['price'] ?? '0.0')?.toInt() ?? 0,
+        json['Trainer']?['picture'] ?? '',
       );
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'trainerId': trainerId,
         'name': name,
         'email': email,
         'phone': phone,
