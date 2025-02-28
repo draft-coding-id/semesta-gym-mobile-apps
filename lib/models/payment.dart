@@ -5,6 +5,7 @@ class Payment {
   String title;
   String amount;
   String paymentStatus;
+  String paidAt;
   int userId;
   User user;
 
@@ -15,6 +16,7 @@ class Payment {
     this.title,
     this.amount,
     this.paymentStatus,
+    this.paidAt,
     this.userId,
     this.user,
   );
@@ -27,8 +29,9 @@ class Payment {
       json['title'] ?? '',
       json['amount'] ?? '',
       json['paymentStatus'] ?? '',
+      json['paidAt'] ?? '',
       json['userId'] ?? 0,
-      User.fromJson(json['User']),
+      json['user'] != null ? User.fromJson(json['user']) : User('Unknown'),
     );
   }
 
@@ -40,6 +43,7 @@ class Payment {
       'title': title,
       'amount': amount,
       'paymentStatus': paymentStatus,
+      'paidAt': paidAt,
       'userId': userId,
       'User': user.toJson(),
     };

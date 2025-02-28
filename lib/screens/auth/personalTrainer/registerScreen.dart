@@ -72,7 +72,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                 }
               })
               .whereType<TrainingFocus>()
-              .toList(); // Remove any null values
+              .toList();
 
           _isLoading = false;
         });
@@ -152,7 +152,6 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
         Uri.parse('http://10.0.2.2:3000/api/trainers/register/'),
       );
 
-      // Add fields
       request.fields['email'] = emailController.text;
       request.fields['password'] = passwordController.text;
       request.fields['name'] = nameController.text;
@@ -161,7 +160,6 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
       request.fields['hoursOfPractice'] = workoutHoursController.text;
       request.fields['price'] = pricePerSessionController.text;
 
-      // Send trainingFocus as separate fields
       _selectedTrainingFocus.asMap().forEach((index, focus) {
         request.fields['trainingFocus[$index]'] = focus.id.toString();
       });
@@ -190,7 +188,6 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
         print("MIME Type: $mimeType");
       }
 
-      // Send the request
       var response = await request.send();
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -201,8 +198,9 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
-
-        Get.offAll(() => LoginScreenTrainer());
+        Future.delayed(Duration(milliseconds: 2000), () {
+          Get.offAll(() => LoginScreenTrainer());
+        });
       } else {
         final responseData = await response.stream.bytesToString();
         final responseJson = jsonDecode(responseData);
@@ -532,8 +530,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                         ),
-                        overflow: TextOverflow
-                            .ellipsis,
+                        overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                       title: Text(

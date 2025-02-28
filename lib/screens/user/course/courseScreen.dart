@@ -38,9 +38,13 @@ class _CourseScreenState extends State<CourseScreen> {
       await fetchCourseByUserId();
       await fetchTrainingFocus();
 
-      if (Get.arguments != null && Get.arguments["triggerPayment"] == true) {
+      if (Get.arguments != null &&
+          Get.arguments is Map &&
+          Get.arguments["triggerPayment"] == true) {
         await postDataPaymentCourse();
-        Get.off(() => Layout(index: 3,));
+        Get.off(() => Layout(
+              index: 3,
+            ));
       }
     });
     _initMidtrans();
@@ -249,7 +253,11 @@ class _CourseScreenState extends State<CourseScreen> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         print("Post course success");
 
-        Get.off(() => Layout(index: 3,), arguments: {"triggerPayment": true});
+        Get.off(
+            () => Layout(
+                  index: 3,
+                ),
+            arguments: {"triggerPayment": true});
       } else {
         print("Error Response: ${response.body}");
         Get.snackbar("Error", "Failed to register course",

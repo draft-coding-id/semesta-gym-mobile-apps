@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:semesta_gym/models/payment.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
@@ -77,65 +78,83 @@ class _HistoryMembershipScreenState extends State<HistoryMembershipScreen> {
             icon: Icon(Icons.arrow_back_ios_new_rounded),
           ),
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(0),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 2.0,
-                        ),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-                      child: Text(
-                        "19-JAN-25",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+        body: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : payments.isEmpty
+                ? Center(
+                    child: Text(
+                      "Tidak ada riwayat pembayaran",
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
-                    Expanded(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.black,
-                            width: 2.0,
-                          ),
-                        ),
-                        padding:
-                            EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-                        child: Center(
-                            child: Text(
-                          "Membeli Paket Membership",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        )),
-                      ),
+                  )
+                : SingleChildScrollView(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: payments.length,
+                      itemBuilder: (context, index) {
+                        final payment = payments[index];
+                        return Row(
+                          children: [
+                            Container(
+                              width: MediaQuery.of(context).size.width*0.3,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 2.0,
+                                ),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 24, horizontal: 8),
+                              child: Center(
+                                child: Text(
+                                  DateFormat("dd-MM-yyyy").format(
+                                      DateTime.tryParse(payment.paidAt) ??
+                                          DateTime(2000, 1, 1)),
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 2.0,
+                                  ),
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 24, horizontal: 8),
+                                child: Center(
+                                    child: Text(
+                                  payment.title,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                )),
+                              ),
+                            ),
+                            Container(
+                              width: MediaQuery.of(context).size.width*0.3,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 2.0,
+                                ),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 24, horizontal: 8),
+                              child: Center(
+                                child: Text(
+                                  "Rp. ${NumberFormat("#,##0", "id_ID").format(double.tryParse(payment.amount) ?? 0)}",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 2.0,
-                        ),
-                      ),
-                      padding:
-                          EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-                      child: Text(
-                        "Rp. 100.000",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ));
+                  ));
   }
 }

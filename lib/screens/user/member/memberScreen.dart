@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/layout.dart';
-import 'package:semesta_gym/models/membership.dart';
 import 'package:semesta_gym/models/membershipByUserId.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
@@ -32,11 +31,10 @@ class _MemberScreenState extends State<MemberScreen> {
     Future.delayed(Duration.zero, () async {
       await fetchMembershipByUserId();
       if (Get.arguments != null &&
+          Get.arguments is Map &&
           Get.arguments["triggerPaymentMembership"] == true) {
         await postDataPaymentMembership();
-        Get.off(() => Layout(
-              index: 3,
-            ));
+        Get.off(() => Layout(index: 2));
       }
     });
   }

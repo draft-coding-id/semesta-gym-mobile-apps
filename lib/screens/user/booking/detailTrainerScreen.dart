@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:semesta_gym/models/trainer.dart';
-import 'package:semesta_gym/screens/user/bookingScreen.dart';
-import 'package:semesta_gym/screens/user/reviewTrainerScreen.dart';
+import 'package:semesta_gym/screens/user/booking/bookingScreen.dart';
+import 'package:semesta_gym/screens/user/booking/reviewTrainerScreen.dart';
 
 class DetailTrainer extends StatefulWidget {
   const DetailTrainer({super.key});

@@ -8,6 +8,7 @@ import 'package:semesta_gym/components/passwordTextFormField.dart';
 import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/user.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
+import 'package:semesta_gym/screens/auth/forgotPassword/forgotPasswordScreen.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
 import 'package:semesta_gym/screens/auth/user/registerScreen.dart';
 import 'package:http/http.dart' as http;
@@ -63,23 +64,23 @@ class _LoginScreenUserState extends State<LoginScreenUser> {
             );
           } else {
             await RememberUserPrefs.storeUserInfo(userInfo, token);
-
-            // Periksa apakah user sudah memilih rekomendasi
-            bool hasChosen = await RememberUserPrefs.hasChosenRecommendation(userInfo.id.toString());
+            bool hasChosen = await RememberUserPrefs.hasChosenRecommendation(
+                userInfo.id.toString());
 
             if (!hasChosen) {
-              // Jika belum memilih rekomendasi, arahkan ke `RecommendationScreen`
               Get.offAll(() => RecommendationScreen());
             } else {
-              // Jika sudah, arahkan ke halaman utama
-              Get.offAll(() => Layout());
+              Future.delayed(Duration(milliseconds: 2000), () {
+                Get.offAll(() => Layout());
+              });
             }
           }
         } else {
           print(response.body);
           Get.snackbar(
             "Error",
-            responseData["message"] ?? "Email atau Password salah atau tidak terdaftar",
+            responseData["message"] ??
+                "Email atau Password salah atau tidak terdaftar",
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red,
             colorText: Colors.white,
@@ -211,7 +212,9 @@ class _LoginScreenUserState extends State<LoginScreenUser> {
                       children: [
                         Text("Lupa Password? "),
                         InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Get.to(() => ForgotPasswordScreen());
+                            },
                             child: Text(
                               "Click di sini!",
                               style: TextStyle(color: Color(0xFFF68989)),

@@ -9,7 +9,6 @@ import 'package:semesta_gym/screens/auth/user/loginScreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
 
-
 class RegisterScreenUser extends StatefulWidget {
   const RegisterScreenUser({super.key});
 
@@ -58,8 +57,9 @@ class _RegisterScreenUserState extends State<RegisterScreenUser> {
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.green,
               colorText: Colors.white);
-
-          Get.offAll(() => LoginScreenUser());
+          Future.delayed(Duration(milliseconds: 2000), () {
+            Get.offAll(() => LoginScreenUser());
+          });
         } else {
           Get.snackbar(
               "Error", responseData["message"] ?? "Registration failed",

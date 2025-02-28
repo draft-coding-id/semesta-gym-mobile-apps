@@ -6,7 +6,7 @@ import 'package:semesta_gym/components/cardWithStar.dart';
 import 'package:semesta_gym/models/trainer.dart';
 import 'package:semesta_gym/models/user.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
-import 'package:semesta_gym/screens/user/detailTrainerScreen.dart';
+import 'package:semesta_gym/screens/user/booking/detailTrainerScreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:semesta_gym/screens/user/notification/notificationScreen.dart';
 
@@ -25,7 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    fetchTrainers();
+    Future.delayed(Duration.zero, () async {
+      await fetchTrainers();
+    });
   }
 
   Future<void> fetchTrainers() async {
@@ -64,8 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         setState(() {
           trainers = allTrainers;
-          this.recommendedTrainers =
-              recommendedTrainers;
+          this.recommendedTrainers = recommendedTrainers;
           isLoading = false;
         });
       } else {

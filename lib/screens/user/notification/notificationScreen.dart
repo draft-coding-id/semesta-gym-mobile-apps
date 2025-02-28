@@ -154,7 +154,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             var relatedPayment = payments.firstWhere(
                               (payment) => payment.paymentableId == booking.id,
                               orElse: () =>
-                                  Payment(0, 0, "", "", "", "", 0, User("")),
+                                  Payment(0, 0, "", "", "", "", '', 0, User("")),
                             );
 
                             return Column(

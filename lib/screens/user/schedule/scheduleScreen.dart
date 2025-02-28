@@ -111,7 +111,7 @@ class _SchedulescreenState extends State<Schedulescreen> {
     var filteredBookings = bookings.where((booking) {
       var relatedPayment = payments.firstWhere(
           (payment) => payment.paymentableId == booking.id,
-          orElse: () => Payment(0, 0, "", "", "", "", 0, User("")));
+          orElse: () => Payment(0, 0, "", "", "", "",'', 0, User("")));
 
       return booking.acceptedTrainer == true &&
           booking.done != true &&

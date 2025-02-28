@@ -1,3 +1,4 @@
+import 'package:semesta_gym/models/review.dart';
 import 'package:semesta_gym/models/trainingFocus.dart';
 import 'package:semesta_gym/models/user.dart';
 
@@ -13,6 +14,7 @@ class Trainer {
   String hoursOfPractice;
   int price;
   String picture;
+  List<Review> review;
 
   Trainer(
     this.id,
@@ -26,6 +28,7 @@ class Trainer {
     this.hoursOfPractice,
     this.price,
     this.picture,
+    this.review
   );
 
   factory Trainer.fromJson(Map<String, dynamic> json) => Trainer(
@@ -43,6 +46,10 @@ class Trainer {
         json['hoursOfPractice'] ?? '',
         double.tryParse(json['price'] ?? '0.0')?.toInt() ?? 0,
         json['picture'] ?? '',
+        (json['Reviews'] as List<dynamic>?)
+                ?.map((e) => Review.fromJson(e))
+                .toList() ??
+            [],
       );
 
   Map<String, dynamic> toJson() => {
@@ -56,8 +63,11 @@ class Trainer {
         'hoursOfPractice': hoursOfPractice,
         'price': price,
         'picture': picture,
+        'review': review.map((e) => e.toJson()).toList(),
       };
 }
+
+
 
 // paten sementera
 /* class Trainer {
