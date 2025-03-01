@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:midtrans_sdk/midtrans_sdk.dart';
@@ -37,12 +38,9 @@ class _CourseScreenState extends State<CourseScreen> {
     Future.delayed(Duration.zero, () async {
       await fetchCourseByUserId();
       await fetchTrainingFocus();
-
-      if (Get.arguments != null &&
-          Get.arguments is Map &&
-          Get.arguments["triggerPayment"] == true) {
+      if (Get.arguments != null && Get.arguments["triggerPayment"] == false) {
         await postDataPaymentCourse();
-        Get.off(() => Layout(
+        Get.offAll(() => Layout(
               index: 3,
             ));
       }
@@ -53,9 +51,8 @@ class _CourseScreenState extends State<CourseScreen> {
   void _initMidtrans() async {
     _midtrans = await MidtransSDK.init(
       config: MidtransConfig(
-        merchantBaseUrl: "",
-        clientKey: "SB-Mid-client-A4xo8S8KfljkK5QP",
-      ),
+          merchantBaseUrl: "",
+          clientKey: "${dotenv.env['MIDTRANS_CLIENT_KEY']}"),
     );
     _midtrans?.setUIKitCustomSetting(skipCustomerDetailsPages: true);
 
@@ -99,9 +96,7 @@ class _CourseScreenState extends State<CourseScreen> {
 
           // Step 4: Check Payment Status
           await checkPaymentStatus();
-        } /* else if (result.transactionStatus == TransactionResultStatus.pending) {
-
-        } */
+        } 
         else if (result.transactionStatus == TransactionResultStatus.cancel) {
           print("Payment was canceled by the user.");
         } else {
@@ -123,7 +118,7 @@ class _CourseScreenState extends State<CourseScreen> {
   //2. generateToken
   Future<String> _generateSnapToken() async {
     savedOrderId = "ORDER-${DateTime.now().millisecondsSinceEpoch}";
-    final String serverKey = "SB-Mid-server-10Dr4ULfMa42pHA6VbJOxEOt";
+    final String serverKey = "${dotenv.env['MIDTRANS_SERVER_KEY']}";
     final String base64Auth =
         "Basic " + base64Encode(utf8.encode("$serverKey:"));
 
@@ -177,7 +172,8 @@ class _CourseScreenState extends State<CourseScreen> {
       return;
     }
 
-    String serverKey = "SB-Mid-server-10Dr4ULfMa42pHA6VbJOxEOt";
+    String serverKey = "${dotenv.env['MIDTRANS_SERVER_KEY']}";
+    ;
     String base64Auth = "Basic " + base64Encode(utf8.encode("$serverKey:"));
 
     try {
@@ -235,7 +231,7 @@ class _CourseScreenState extends State<CourseScreen> {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/courses'),
+        Uri.parse('${dotenv.env['API_REGISTER_COURSES_USER']}'),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"
@@ -253,11 +249,11 @@ class _CourseScreenState extends State<CourseScreen> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         print("Post course success");
 
-        Get.off(
+        Get.offAll(
             () => Layout(
                   index: 3,
                 ),
-            arguments: {"triggerPayment": true});
+            arguments: {"triggerPayment": false});
       } else {
         print("Error Response: ${response.body}");
         Get.snackbar("Error", "Failed to register course",
@@ -278,7 +274,7 @@ class _CourseScreenState extends State<CourseScreen> {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/payments/course'),
+        Uri.parse('${dotenv.env['API_PAYMENT_COURSE']}'),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"
@@ -329,7 +325,7 @@ class _CourseScreenState extends State<CourseScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:3000/api/courses/user/${currentUser.user.id}'),
+            '${dotenv.env['API_REGISTER_COURSES_USER']}user/${currentUser.user.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -366,7 +362,7 @@ class _CourseScreenState extends State<CourseScreen> {
   Future<void> fetchTrainingFocus() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:3000/api/training-focus'));
+          await http.get(Uri.parse('${dotenv.env['API_TRAINING_FOCUS']}'));
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -479,7 +475,7 @@ class _CourseScreenState extends State<CourseScreen> {
                                 decoration: BoxDecoration(
                                   image: DecorationImage(
                                     image: NetworkImage(
-                                        "http://10.0.2.2:3000/${trainingFocusData.picture}"),
+                                        "${dotenv.env['BASE_URL_API']}${trainingFocusData.picture}"),
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -589,157 +585,3 @@ class _CourseScreenState extends State<CourseScreen> {
     );
   }
 }
-
-/*  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF82ACEF),
-      appBar: AppBar(
-        title: const Text(
-          "Course",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.grey.shade300,
-      ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : trainingFocus.isEmpty
-              ? Center(child: Text("Tidak ada list course"))
-              : SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Expired",
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 8,
-                                offset: Offset(4, 6),
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 5),
-                            child: Center(
-                              child: Text(
-                                courseUser.isNotEmpty
-                                    ? courseUser.last.endDate
-                                    : "-",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: trainingFocus.length,
-                          itemBuilder: (context, index) {
-                            final trainingFocusData = trainingFocus[index];
-                            return Column(
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Get.to(() => TrainingCourseScreen(),
-                                        arguments: trainingFocusData);
-                                  },
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: 160,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: NetworkImage(
-                                              "http://10.0.2.2:3000/${trainingFocusData.picture}"),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          trainingFocusData.name.toUpperCase(),
-                                          style: TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                            shadows: [
-                                              Shadow(
-                                                offset: Offset(2, 2),
-                                                blurRadius: 4,
-                                                color: Colors.black
-                                                    .withOpacity(0.7),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 14,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-    );
-  }
-} */
-
-/*   Future<void> _fetchCoursesByUserId() async {
-    String? token = await RememberUserPrefs.readAuthToken();
-    try {
-      final response = await http.get(
-        Uri.parse(
-            'http://10.0.2.2:3000/api/user/${currentUser.user.id}'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
-        setState(() {
-        user = User.fromJson(data);
-        isLoading = false;
-      });
-      } else {
-        throw Exception('Failed to load data');
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      Get.snackbar("Error", "Failed to load user data");
-    }
-  }
- */

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
@@ -47,7 +48,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
   Future<void> fetchTrainingFocus() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:3000/api/training-focus'));
+          await http.get(Uri.parse('${dotenv.env['API_TRAINING_FOCUS']}'));
 
       print('Response Status: ${response.statusCode}');
       print('Response Body: ${response.body}');
@@ -149,7 +150,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://10.0.2.2:3000/api/trainers/register/'),
+        Uri.parse('${dotenv.env['AUTH_REGISTER_TRAINER']}'),
       );
 
       request.fields['email'] = emailController.text;
@@ -227,60 +228,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
       });
     }
   }
-
-  /*  Future<void> registerTrainer() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/trainers/register/'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "email": emailController.text,
-          "password": passwordController.text,
-          "name": nameController.text,
-          "phone": phoneNumberController.text,
-          "trainingFocus": _selectedTrainingFocus.map((focus) => focus.id).toList(),
-          "description": descriptionController.text,
-          "hoursOfPractice": workoutHoursController.text,
-          "price": pricePerSessionController.text,
-          "picture": _selectedImage.toString()
-        }),
-      );
-
-      final responseData = jsonDecode(response.body);
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar("Success", "Registration successful!",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white);
-
-        Get.offAll(() => LoginScreenTrainer());
-      } else {
-        Get.snackbar("Error", responseData["message"] ?? "Registration failed",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white);
-      }
-    } catch (error) {
-      Get.snackbar("Error", "Something went wrong. Try again later.",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white);
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  } */
-
+  
   @override
   void initState() {
     super.initState();

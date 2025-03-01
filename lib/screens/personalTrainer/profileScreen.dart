@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/menu.dart';
 import 'package:semesta_gym/screens/personalTrainer/editProfileScreen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
-import 'package:semesta_gym/screens/auth/loginAll.dart';
 
 class ProfileScreenPt extends StatefulWidget {
   const ProfileScreenPt({super.key});
@@ -54,9 +51,7 @@ class _ProfileScreenPtState extends State<ProfileScreenPt> {
                 "Profile",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              actions: [
-                IconButton(onPressed: () {}, icon: Icon(Icons.notifications))
-              ],
+             
               backgroundColor: Colors.grey.shade300,
             ),
             body: Padding(

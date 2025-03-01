@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/screens/auth/forgotPassword/resetPassword.dart';
@@ -39,7 +40,7 @@ class _VerifyScreenState extends State<VerifyScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/otp/verify'),
+        Uri.parse('${dotenv.env['API_VERIFY_OTP']}'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "email": widget.email,
@@ -60,7 +61,10 @@ class _VerifyScreenState extends State<VerifyScreen> {
           colorText: Colors.white,
         );
 
-       await Get.to(() => ResetPassword(email: widget.email, token: token));
+        Future.delayed(Duration(milliseconds: 2000), () {
+          Get.to(() => ResetPassword(email: widget.email, token: token));
+        });
+
       } else {
         Get.snackbar(
           "Error",

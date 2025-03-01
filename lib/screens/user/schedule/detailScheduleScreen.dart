@@ -37,7 +37,8 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/reviews/${booking.trainer.trainerId}'),
+        Uri.parse(
+            'http://10.0.2.2:3000/api/reviews/${booking.trainer.trainerId}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -309,6 +310,7 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
         week4Date: booking.week4Date,
         week4Done: weekNumber == 4 ? value : booking.week4Done,
         acceptedTrainer: booking.acceptedTrainer,
+        endDate: booking.endDate,
         done: booking.done,
         reasonRejection: booking.reasonRejection,
         createdAt: booking.createdAt,
@@ -404,7 +406,9 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
                         color: innerBoxIsScrolled ? Colors.black : Colors.white,
                       ),
                       onPressed: () {
-                        Get.offAll(() => Layout(index: 1,));
+                        Get.offAll(() => Layout(
+                              index: 1,
+                            ));
                       },
                     ),
                   ),
@@ -425,9 +429,10 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
                           Container(
                             width: double.infinity,
                             decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(
-                                        color: Colors.grey, width: 1))),
+                              border: Border(
+                                  bottom:
+                                      BorderSide(color: Colors.grey, width: 1)),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                   vertical: 16.0, horizontal: 16),
@@ -440,14 +445,41 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
                                         fontSize: 24,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  Text(
-                                    "Jadwal anda Sisa",
-                                    style: TextStyle(color: Colors.red),
-                                  )
+                                  if (booking.endDate != null)
+                                    () {
+                                     
+                                      int daysLeft = DateTime.parse(
+                                              booking.endDate.toString())
+                                          .difference(DateTime.now())
+                                          .inDays;
+
+                                      
+                                      String message;
+                                      Color textColor;
+
+                                      if (daysLeft > 0) {
+                                        message =
+                                            "Jadwal anda sisa $daysLeft hari";
+                                        textColor = Colors.red;
+                                      } else if (daysLeft == 0) {
+                                        message =
+                                            "Ini hari terakhir jadwal anda";
+                                        textColor = Colors.orange;
+                                      } else {
+                                        message = "Jadwal melewati tenggat";
+                                        textColor = Colors.grey;
+                                      }
+
+                                      return Text(
+                                        message,
+                                        style: TextStyle(color: textColor),
+                                      );
+                                    }(),
                                 ],
                               ),
                             ),
                           ),
+
                           SizedBox(
                             height: 8,
                           ),
@@ -489,24 +521,29 @@ class _DetailScheduleScreenState extends State<DetailScheduleScreen> {
                                         ),
                                         SizedBox(height: 8),
                                         GestureDetector(
-                                          onTap: () {
-                                            QuickAlert.show(
-                                              context: context,
-                                              type: QuickAlertType.warning,
-                                              title: "${weekNames[index]}",
-                                              text:
-                                                  "Apakah Pelatihan Sudah siap ?",
-                                              confirmBtnColor:
-                                                  Color(0xFFF68989),
-                                              confirmBtnText: "Sudah",
-                                              onConfirmBtnTap: () {
-                                                updateWeekStatus(weekNumber);
-                                                Get.back();
-                                              },
-                                              cancelBtnText: "Belum",
-                                              showCancelBtn: true,
-                                            );
-                                          },
+                                          onTap: weekDoneStatus
+                                              ? null
+                                              : () {
+                                                  QuickAlert.show(
+                                                    context: context,
+                                                    type:
+                                                        QuickAlertType.warning,
+                                                    title:
+                                                        "${weekNames[index]}",
+                                                    text:
+                                                        "Apakah Pelatihan Sudah siap?",
+                                                    confirmBtnColor:
+                                                        Color(0xFFF68989),
+                                                    confirmBtnText: "Sudah",
+                                                    onConfirmBtnTap: () {
+                                                      updateWeekStatus(
+                                                          weekNumber);
+                                                      Get.back();
+                                                    },
+                                                    cancelBtnText: "Belum",
+                                                    showCancelBtn: true,
+                                                  );
+                                                },
                                           child: Container(
                                             width: double.infinity,
                                             decoration: BoxDecoration(

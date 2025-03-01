@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quickalert/quickalert.dart';
@@ -25,7 +26,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     try {
       String? token = await RememberUserPrefs.readAuthToken();
       final response = await http.put(
-        Uri.parse("http://10.0.2.2:3000/api/bookings/${booking.id}"),
+        Uri.parse('${dotenv.env['API_BOOKING']}${booking.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"
@@ -50,7 +51,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
           type: QuickAlertType.success,
           text: "Booking berhasil diterima!",
           onConfirmBtnTap: () {
-            Get.off(() => LayoutPt());
+            Get.offAll(() => LayoutPt());
           },
         );
       } else {
@@ -94,7 +95,7 @@ class _BookingDetailScreenState extends State<BookingDetailScreen> {
     try {
       String? token = await RememberUserPrefs.readAuthToken();
       final response = await http.put(
-        Uri.parse("http://10.0.2.2:3000/api/bookings/${booking.id}"),
+        Uri.parse('${dotenv.env['API_BOOKING']}${booking.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"

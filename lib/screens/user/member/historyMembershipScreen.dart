@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/payment.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
@@ -38,7 +40,7 @@ class _HistoryMembershipScreenState extends State<HistoryMembershipScreen> {
       String? token = await RememberUserPrefs.readAuthToken();
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:3000/api/payments/user/${_currentUser.user.id}'),
+            '${dotenv.env['API_PAYMENT_BY_USER_ID']}${_currentUser.user.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -73,7 +75,7 @@ class _HistoryMembershipScreenState extends State<HistoryMembershipScreen> {
           ),
           leading: IconButton(
             onPressed: () {
-              Get.back();
+              Get.offAll(() => Layout(index: 2,));
             },
             icon: Icon(Icons.arrow_back_ios_new_rounded),
           ),

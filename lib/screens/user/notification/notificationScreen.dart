@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/layout.dart';
@@ -42,7 +43,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       String? token = await RememberUserPrefs.readAuthToken();
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:3000/api/bookings/member/${_currentUser.user.id}'),
+            '${dotenv.env['API_BOOKING']}member/${_currentUser.user.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -74,7 +75,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       String? token = await RememberUserPrefs.readAuthToken();
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:3000/api/payments/user/${_currentUser.user.id}'),
+            '${dotenv.env['API_PAYMENT_BY_USER_ID']}${_currentUser.user.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -119,7 +120,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
         centerTitle: true,
         leading: IconButton(
           onPressed: () {
-            Get.off(() => Layout());
+            Get.offAll(() => Layout());
           },
           icon: Icon(Icons.arrow_back_ios_new_rounded),
         ),
@@ -222,7 +223,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                               borderRadius:
                                                   BorderRadius.circular(8),
                                               child: Image.network(
-                                                "http://10.0.2.2:3000/${booking.trainer.picture}",
+                                                "${dotenv.env['BASE_URL_API']}${booking.trainer.picture}",
                                                 width: MediaQuery.of(context)
                                                         .size
                                                         .width *

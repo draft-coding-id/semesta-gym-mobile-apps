@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:quickalert/quickalert.dart';
@@ -29,34 +30,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   bool isLoading = false;
 
-  /* Future<void> logout() async {
-    String? token =
-        await RememberUserPrefs.readAuthToken();
-
-    try {
-      final response = await http.post(
-        Uri.parse(
-            'http://10.0.2.2:3000/api/auth/logout'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        print("Logout successful");
-
-        RememberUserPrefs.removeUserInfo().then((value) {
-          Get.offAll(() => LoginScreenUser());
-        });
-      } else {
-        print("Logout failed: ${response.statusCode} - ${response.body}");
-      }
-    } catch (error) {
-      print("Error during logout: $error");
-    }
-  } */
-
   Future updateUser(User user) async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -71,7 +44,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       final response = await http.put(
         Uri.parse(
-            'http://10.0.2.2:3000/api/user/${_currentUser.user.id}/update'),
+            '${dotenv.env['API_USER']}${_currentUser.user.id}/update'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

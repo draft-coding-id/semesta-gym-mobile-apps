@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -36,7 +37,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
   Future<void> _fetchTrainingFocus() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:3000/api/training-focus'));
+          await http.get(Uri.parse('${dotenv.env['API_TRAINING_FOCUS']}'));
       if (response.statusCode == 200) {
         List<dynamic> data = json.decode(response.body);
         setState(() {

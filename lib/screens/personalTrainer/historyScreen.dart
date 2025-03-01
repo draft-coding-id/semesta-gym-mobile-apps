@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/models/booking.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
@@ -37,7 +38,7 @@ class _HistoryScreenPtState extends State<HistoryScreenPt> {
       String? token = await RememberUserPrefs.readAuthToken();
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:3000/api/bookings/trainer/${_currentUser.user.id}'),
+            '${dotenv.env['API_BOOKING']}trainer/${_currentUser.user.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -108,7 +109,7 @@ class _HistoryScreenPtState extends State<HistoryScreenPt> {
                       final booking = bookings[index];
                       return GestureDetector(
                         onTap: () {
-                          /* Get.to(() => ScheduleScreenPt(), arguments: booking); */
+                          
                         },
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 12),

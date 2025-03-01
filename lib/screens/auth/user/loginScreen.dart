@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/components/myTextFormField.dart';
@@ -41,7 +42,7 @@ class _LoginScreenUserState extends State<LoginScreenUser> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:3000/api/auth/login/'),
+          Uri.parse('${dotenv.env['AUTH_LOGIN']}'),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             "email": emailController.text,
@@ -68,8 +69,24 @@ class _LoginScreenUserState extends State<LoginScreenUser> {
                 userInfo.id.toString());
 
             if (!hasChosen) {
-              Get.offAll(() => RecommendationScreen());
+              Get.snackbar(
+                "Success",
+                "Login successful!",
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green,
+                colorText: Colors.white,
+              );
+              Future.delayed(Duration(milliseconds: 2000), () {
+                Get.offAll(() => RecommendationScreen());
+              });
             } else {
+              Get.snackbar(
+                "Success",
+                "Login successful!",
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.green,
+                colorText: Colors.white,
+              );
               Future.delayed(Duration(milliseconds: 2000), () {
                 Get.offAll(() => Layout());
               });

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/cardWithStar.dart';
 import 'package:semesta_gym/models/trainer.dart';
@@ -46,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/trainers/'),
+        Uri.parse('${dotenv.env['API_TRAINER']}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.to(() => DetailTrainer(), arguments: trainer);
                     },
                     rating: trainer.rating,
-                    imageUrl: "http://10.0.2.2:3000/${trainer.picture}",
+                    imageUrl: "${dotenv.env['BASE_URL_API']}${trainer.picture}",
                   );
                 },
               ),
@@ -159,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Get.to(() => DetailTrainer(), arguments: trainer);
                     },
                     rating: trainer.rating,
-                    imageUrl: "http://10.0.2.2:3000/${trainer.picture}",
+                    imageUrl: "${dotenv.env['BASE_URL_API']}${trainer.picture}",
                   );
                 },
               ),

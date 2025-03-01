@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/screens/auth/forgotPassword/verifyOTPScreen.dart';
@@ -32,7 +33,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/otp'),
+        Uri.parse('${dotenv.env['API_SEND_OTP']}'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "email": emailController.text,
@@ -61,7 +62,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           colorText: Colors.white,
         );
 
-        await Get.to(() => VerifyScreen(email: emailController.text));
+        Future.delayed(Duration(milliseconds: 2000), () {
+          Get.to(() => VerifyScreen(email: emailController.text));
+        });
+
       } else {
         Get.snackbar(
           "Error",

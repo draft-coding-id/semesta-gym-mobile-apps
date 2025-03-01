@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:midtrans_sdk/midtrans_sdk.dart';
@@ -36,7 +37,7 @@ class _PayBookingScreenState extends State<PayBookingScreen> {
     _midtrans = await MidtransSDK.init(
       config: MidtransConfig(
         merchantBaseUrl: "",
-        clientKey: "SB-Mid-client-A4xo8S8KfljkK5QP",
+        clientKey: "${dotenv.env['MIDTRANS_CLIENT_KEY']}",
       ),
     );
     _midtrans?.setUIKitCustomSetting(skipCustomerDetailsPages: true);
@@ -105,7 +106,7 @@ class _PayBookingScreenState extends State<PayBookingScreen> {
   //2. generateToken
   Future<String> _generateSnapToken() async {
     savedOrderId = "ORDER-${DateTime.now().millisecondsSinceEpoch}";
-    final String serverKey = "SB-Mid-server-10Dr4ULfMa42pHA6VbJOxEOt";
+    final String serverKey = "${dotenv.env['MIDTRANS_SERVER_KEY']}";
     final String base64Auth =
         "Basic " + base64Encode(utf8.encode("$serverKey:"));
 
@@ -159,7 +160,7 @@ class _PayBookingScreenState extends State<PayBookingScreen> {
       return;
     }
 
-    String serverKey = "SB-Mid-server-10Dr4ULfMa42pHA6VbJOxEOt";
+    String serverKey = "${dotenv.env['MIDTRANS_SERVER_KEY']}";
     String base64Auth = "Basic " + base64Encode(utf8.encode("$serverKey:"));
 
     try {
@@ -217,7 +218,7 @@ class _PayBookingScreenState extends State<PayBookingScreen> {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/payments/booking'),
+        Uri.parse('${dotenv.env['API_PAYMENT_BOOKING']}'),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"
@@ -278,7 +279,7 @@ class _PayBookingScreenState extends State<PayBookingScreen> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: NetworkImage(
-                            "http://10.0.2.2:3000/${booking.trainer.picture}"),
+                            "${dotenv.env['BASE_URL_API']}${booking.trainer.picture}"),
                         fit: BoxFit.cover,
                       ),
                     ),

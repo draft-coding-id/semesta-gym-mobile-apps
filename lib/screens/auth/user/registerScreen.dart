@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/components/myTextFormField.dart';
@@ -40,7 +41,7 @@ class _RegisterScreenUserState extends State<RegisterScreenUser> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:3000/api/auth/register/'),
+          Uri.parse('${dotenv.env['AUTH_REGISTER_USER']}'),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             "email": emailController.text,

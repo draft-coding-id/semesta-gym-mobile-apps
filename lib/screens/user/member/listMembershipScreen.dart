@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:midtrans_sdk/midtrans_sdk.dart';
-import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/membership.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
@@ -41,7 +41,7 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
     _midtrans = await MidtransSDK.init(
       config: MidtransConfig(
         merchantBaseUrl: "",
-        clientKey: "SB-Mid-client-A4xo8S8KfljkK5QP",
+        clientKey: "${dotenv.env['MIDTRANS_CLIENT_KEY']}",
       ),
     );
     _midtrans?.setUIKitCustomSetting(skipCustomerDetailsPages: true);
@@ -119,7 +119,7 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
     }
 
     savedOrderId = "ORDER-${DateTime.now().millisecondsSinceEpoch}";
-    final String serverKey = "SB-Mid-server-10Dr4ULfMa42pHA6VbJOxEOt";
+    final String serverKey = "${dotenv.env['MIDTRANS_SERVER_KEY']}";
     final String base64Auth =
         "Basic " + base64Encode(utf8.encode("$serverKey:"));
 
@@ -174,7 +174,7 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
       return;
     }
 
-    String serverKey = "SB-Mid-server-10Dr4ULfMa42pHA6VbJOxEOt";
+    String serverKey = "${dotenv.env['MIDTRANS_SERVER_KEY']}";
     String base64Auth = "Basic " + base64Encode(utf8.encode("$serverKey:"));
 
     try {
@@ -246,7 +246,7 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/memberships/register'),
+        Uri.parse('${dotenv.env['API_REGISTER_USER_MEMBERSHIP']}'),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"
@@ -268,7 +268,7 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
 
         await fetchMembership();
         setState(() {});
-        Get.off(() => Layout(index: 2,),
+        Get.offAll(() => Layout(index: 2,),
             arguments: {"triggerPaymentMembership": true});
       } else {
         print("Error Response: ${response.body}");
@@ -291,7 +291,7 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/memberships'),
+        Uri.parse('${dotenv.env['API_MEMBERSHIP']}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

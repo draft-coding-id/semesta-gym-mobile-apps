@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
@@ -58,7 +59,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<void> fetchTrainingFocus() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:3000/api/training-focus'));
+          await http.get(Uri.parse('${dotenv.env['API_TRAINING_FOCUS']}'));
 
       print('Response Status: ${response.statusCode}');
       print('Response Body: ${response.body}');
@@ -104,7 +105,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/trainers/'),
+        Uri.parse('${dotenv.env['API_TRAINER']}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -146,7 +147,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  //fetch trainer by id http://10.0.2.2t:3000/api/trainers/7
+  //fetch trainer by id 
   Future<void> fetchSingleTrainer(int? trainerId) async {
     if (trainerId == null || trainerId == 0) {
       print("Invalid trainer ID");
@@ -157,7 +158,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/trainers/$trainerId'),
+        Uri.parse('${dotenv.env['API_TRAINER']}$trainerId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -260,7 +261,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     try {
       var request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://10.0.2.2:3000/api/trainers/${trainer?.id ?? 0}'),
+        Uri.parse('${dotenv.env['API_TRAINER']}${trainer?.id ?? 0}'),
       );
       request.headers.addAll({
         'Authorization': 'Bearer $token',
@@ -494,7 +495,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                           borderRadius:
                                               BorderRadius.circular(10),
                                           child: Image.network(
-                                            "http://10.0.2.2:3000/${trainer!.picture}",
+                                            "${dotenv.env['BASE_URL_API']}${trainer!.picture}",
                                             width: double.infinity,
                                             height: 150,
                                             fit: BoxFit.cover,

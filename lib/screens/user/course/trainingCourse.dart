@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/layout.dart';
@@ -7,7 +8,6 @@ import 'package:semesta_gym/models/course.dart';
 import 'package:semesta_gym/models/trainingFocus.dart';
 import 'package:http/http.dart' as http;
 import 'package:semesta_gym/preferences/rememberUser.dart';
-import 'package:semesta_gym/screens/user/course/courseScreen.dart';
 import 'package:semesta_gym/screens/user/course/description.dart';
 
 class TrainingCourseScreen extends StatefulWidget {
@@ -35,8 +35,7 @@ class _TrainingCourseScreenState extends State<TrainingCourseScreen> {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.get(
-        Uri.parse(
-            'http://10.0.2.2:3000/api/courses/data-course/training-focus/${trainingFocus.id}'),
+        Uri.parse('${dotenv.env['API_DATA_COURSE']}training-focus/${trainingFocus.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -116,7 +115,7 @@ class _TrainingCourseScreenState extends State<TrainingCourseScreen> {
                     return Column(
                       children: [
                         Image.network(
-                          "http://10.0.2.2:3000/${course.picture}",
+                          "${dotenv.env['BASE_URL_API']}${course.picture}",
                           width: double.infinity,
                           height: MediaQuery.of(context).size.height * 0.55,
                           fit: BoxFit.cover,

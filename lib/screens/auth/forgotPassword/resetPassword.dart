@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:semesta_gym/components/mainButton.dart';
@@ -36,7 +37,7 @@ class _ResetPasswordState extends State<ResetPassword> {
 
     try {
       final userResponse = await http.get(
-        Uri.parse('http://10.0.2.2:3000/api/user/'),
+        Uri.parse('${dotenv.env['API_USER']}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer ${widget.token}",
@@ -73,7 +74,7 @@ class _ResetPasswordState extends State<ResetPassword> {
         print("User Found: ID = $userId, Role = $userRole");
 
         final updateResponse = await http.put(
-          Uri.parse('http://10.0.2.2:3000/api/user/$userId/update'),
+          Uri.parse('${dotenv.env['API_USER']}$userId/update'),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer ${widget.token}",

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quickalert/quickalert.dart';
@@ -31,10 +32,9 @@ class _MemberScreenState extends State<MemberScreen> {
     Future.delayed(Duration.zero, () async {
       await fetchMembershipByUserId();
       if (Get.arguments != null &&
-          Get.arguments is Map &&
           Get.arguments["triggerPaymentMembership"] == true) {
         await postDataPaymentMembership();
-        Get.off(() => Layout(index: 2));
+        Get.offAll(() => Layout(index: 2));
       }
     });
   }
@@ -45,7 +45,7 @@ class _MemberScreenState extends State<MemberScreen> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:3000/api/memberships/user/${currentUser.user.id}'),
+            '${dotenv.env['API_MEMBERSHIP_BY_USER_ID']}${currentUser.user.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -86,7 +86,7 @@ class _MemberScreenState extends State<MemberScreen> {
     String? token = await RememberUserPrefs.readAuthToken();
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3000/api/payments/membership'),
+        Uri.parse('${dotenv.env['API_PAYMENT_MEMBERSHIP']}'),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"

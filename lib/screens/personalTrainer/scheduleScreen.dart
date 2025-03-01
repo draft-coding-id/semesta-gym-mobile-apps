@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
@@ -22,7 +23,7 @@ class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
     try {
       String? token = await RememberUserPrefs.readAuthToken();
       final response = await http.put(
-        Uri.parse("http://10.0.2.2:3000/api/bookings/${booking.id}"),
+        Uri.parse("${dotenv.env['API_BOOKING']}${booking.id}"),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"
@@ -103,7 +104,7 @@ class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
     try {
       String? token = await RememberUserPrefs.readAuthToken();
       var response = await http.put(
-        Uri.parse("http://10.0.2.2:3000/api/bookings/${booking.id}"),
+        Uri.parse("${dotenv.env['API_BOOKING']}${booking.id}"),
         headers: {
           'Authorization': 'Bearer $token',
           "Content-Type": "application/json"
@@ -226,6 +227,32 @@ class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
                       style:
                           TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                     ),
+                    if (booking.endDate != null)
+                      () {
+                        int daysLeft =
+                            DateTime.parse(booking.endDate.toString())
+                                .difference(DateTime.now())
+                                .inDays;
+
+                        String message;
+                        Color textColor;
+
+                        if (daysLeft > 0) {
+                          message = "Jadwal anda sisa $daysLeft hari";
+                          textColor = Colors.red;
+                        } else if (daysLeft == 0) {
+                          message = "Ini hari terakhir jadwal anda";
+                          textColor = Colors.orange;
+                        } else {
+                          message = "Jadwal melewati tenggat";
+                          textColor = Colors.grey;
+                        }
+
+                        return Text(
+                          message,
+                          style: TextStyle(color: textColor),
+                        );
+                      }(),
                   ],
                 ),
               ),
@@ -263,22 +290,24 @@ class _ScheduleScreenPtState extends State<ScheduleScreenPt> {
                       ),
                       SizedBox(height: 8),
                       GestureDetector(
-                        onTap: () {
-                          QuickAlert.show(
-                            context: context,
-                            type: QuickAlertType.warning,
-                            title: "${weekNames[index]}",
-                            text: "Apakah Pelatihan Sudah siap ?",
-                            confirmBtnColor: Color(0xFFF68989),
-                            confirmBtnText: "Sudah",
-                            onConfirmBtnTap: () {
-                              updateWeekStatus(weekNumber);
-                              Get.back();
-                            },
-                            cancelBtnText: "Belum",
-                            showCancelBtn: true,
-                          );
-                        },
+                        onTap: weekDoneStatus
+                            ? null
+                            : () {
+                                QuickAlert.show(
+                                  context: context,
+                                  type: QuickAlertType.warning,
+                                  title: "${weekNames[index]}",
+                                  text: "Apakah Pelatihan Sudah siap?",
+                                  confirmBtnColor: Color(0xFFF68989),
+                                  confirmBtnText: "Sudah",
+                                  onConfirmBtnTap: () {
+                                    updateWeekStatus(weekNumber);
+                                    Get.back();
+                                  },
+                                  cancelBtnText: "Belum",
+                                  showCancelBtn: true,
+                                );
+                              },
                         child: Container(
                           width: double.infinity,
                           decoration: BoxDecoration(

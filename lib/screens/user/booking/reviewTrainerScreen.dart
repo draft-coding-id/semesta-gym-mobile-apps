@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/models/trainer.dart';
 
@@ -28,7 +29,7 @@ class _ReviewTrainerScreenState extends State<ReviewTrainerScreen> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: NetworkImage(
-                            "http://10.0.2.2:3000/${trainer.picture}"),
+                            "${dotenv.env['BASE_URL_API']}${trainer.picture}"),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -126,37 +127,48 @@ class _ReviewTrainerScreenState extends State<ReviewTrainerScreen> {
                     ),
                   ),
                   Column(
-                    children: trainer.review.map((review) {
-                      int index =
-                          trainer.review.indexOf(review);
-                      return Container(
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(color: Colors.black, width: 1.0),
-                          ),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 16),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "User ${index + 1}:",
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(
-                                width: 14),
-                            Expanded(
+                    children: trainer.review.isEmpty
+                        ? [
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
                               child: Text(
-                                review.comment.toString(),
-                                style: TextStyle(fontSize: 16),
+                                "Belum ada review dari user lain",
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                          ]
+                        : trainer.review.map((review) {
+                            int index = trainer.review.indexOf(review);
+                            return Container(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                      color: Colors.black, width: 1.0),
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "User ${index + 1}:",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  SizedBox(width: 14),
+                                  Expanded(
+                                    child: Text(
+                                      review.comment.toString(),
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
                   )
                 ]),
               ),

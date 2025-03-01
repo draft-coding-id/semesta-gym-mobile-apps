@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quickalert/quickalert.dart';
@@ -53,7 +54,7 @@ class _BookingScreenState extends State<BookingScreen> {
       String? token = await RememberUserPrefs.readAuthToken();
       try {
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:3000/api/bookings'),
+          Uri.parse('${dotenv.env['API_BOOKING']}'),
           headers: {
             'Authorization': 'Bearer $token',
             "Content-Type": "application/json"
@@ -65,10 +66,10 @@ class _BookingScreenState extends State<BookingScreen> {
             "week2Date": convertToISO8601(week2DateController.text),
             "week3Date": convertToISO8601(week3DateController.text),
             "week4Date": convertToISO8601(week4DateController.text),
-            "endDate": DateTime.now()
+            /* "endDate": DateTime.now()
               .toUtc()
               .add(Duration(days: 30))
-              .toIso8601String()
+              .toIso8601String() */
           }),
         );
 
@@ -119,7 +120,7 @@ class _BookingScreenState extends State<BookingScreen> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: NetworkImage(
-                            "http://10.0.2.2:3000/${trainer?.picture}"),
+                            "${dotenv.env['BASE_URL_API']}${trainer?.picture}"),
                         fit: BoxFit.cover,
                       ),
                     ),

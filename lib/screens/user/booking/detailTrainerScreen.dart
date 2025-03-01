@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:semesta_gym/models/trainer.dart';
@@ -31,7 +32,7 @@ class _DetailTrainerState extends State<DetailTrainer> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: NetworkImage(
-                            "http://10.0.2.2:3000/${trainer.picture}"),
+                            "${dotenv.env['BASE_URL_API']}${trainer.picture}"),
                         fit: BoxFit.cover,
                       ),
                     ),

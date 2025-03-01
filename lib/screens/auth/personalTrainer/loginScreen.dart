@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/mainButton.dart';
 import 'package:semesta_gym/components/myTextFormField.dart';
 import 'package:semesta_gym/components/passwordTextFormField.dart';
 import 'package:semesta_gym/models/user.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
+import 'package:semesta_gym/screens/auth/forgotPassword/forgotPasswordScreen.dart';
 import 'package:semesta_gym/screens/auth/loginAll.dart';
 import 'package:semesta_gym/screens/auth/personalTrainer/registerScreen.dart';
 import 'package:http/http.dart' as http;
@@ -39,7 +41,7 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://10.0.2.2:3000/api/auth/login/'),
+          Uri.parse('${dotenv.env['AUTH_LOGIN']}'),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             "email": emailController.text,
@@ -211,7 +213,9 @@ class _LoginScreenTrainerState extends State<LoginScreenTrainer> {
                       children: [
                         Text("Lupa Password? "),
                         InkWell(
-                            onTap: () {},
+                            onTap: () {
+                              Get.to(() => ForgotPasswordScreen());
+                            },
                             child: Text(
                               "Click di sini!",
                               style: TextStyle(color: Color(0xFFF68989)),
