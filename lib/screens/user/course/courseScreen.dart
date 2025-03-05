@@ -96,8 +96,22 @@ class _CourseScreenState extends State<CourseScreen> {
 
           // Step 4: Check Payment Status
           await checkPaymentStatus();
-        } 
-        else if (result.transactionStatus == TransactionResultStatus.cancel) {
+        } else if (result.transactionStatus ==
+            TransactionResultStatus.pending) {
+          print("🟡 Payment is still pending. Informing the user...");
+
+          await QuickAlert.show(
+            context: context,
+            type: QuickAlertType.warning,
+            confirmBtnText: "OK",
+            title: "Pending Payment",
+            text:
+                "Transaksi kamu dalam status pending. Tolong selesaikan payment dan tetap berada di screen ini sampai transaksi selesai.",
+            confirmBtnColor: Colors.orange,
+          );
+
+          checkPaymentStatus();
+        } else if (result.transactionStatus == TransactionResultStatus.cancel) {
           print("Payment was canceled by the user.");
         } else {
           print("Payment failed.");
@@ -168,62 +182,67 @@ class _CourseScreenState extends State<CourseScreen> {
   //3. checkPaymentStatus and waiting before do next function
   Future<void> checkPaymentStatus() async {
     if (savedOrderId == null || savedOrderId!.isEmpty) {
-      print("❌ Order ID tidak tersedia.");
+      print("❌ Order ID not available.");
       return;
     }
 
     String serverKey = "${dotenv.env['MIDTRANS_SERVER_KEY']}";
-    ;
     String base64Auth = "Basic " + base64Encode(utf8.encode("$serverKey:"));
 
-    try {
-      final response = await http.get(
-        Uri.parse("https://api.sandbox.midtrans.com/v2/$savedOrderId/status"),
-        headers: {
-          'Authorization': base64Auth,
-          'Content-Type': 'application/json'
-        },
-      );
+    int retryCount = 0;
+    const int maxRetries = 300;
 
-      print("🟡 Full Midtrans Response: ${response.body}");
+    while (retryCount < maxRetries) {
+      try {
+        final response = await http.get(
+          Uri.parse("https://api.sandbox.midtrans.com/v2/$savedOrderId/status"),
+          headers: {
+            'Authorization': base64Auth,
+            'Content-Type': 'application/json'
+          },
+        );
 
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
+        if (response.statusCode == 200) {
+          var data = json.decode(response.body);
 
-        // Check if response contains `transaction_status`
-        if (data == null || !data.containsKey('transaction_status')) {
-          print(
-              "❌ Error: Response does not contain transaction_status. Full response: $data");
-          return;
-        }
+          if (!data.containsKey('transaction_status')) {
+            print("❌ Error: No transaction_status in response.");
+            return;
+          }
 
-        String transactionStatus = data['transaction_status'] ?? "unknown";
-        print("✅ Payment Status: $transactionStatus");
+          String transactionStatus = data['transaction_status'] ?? "unknown";
+          print("🔍 Payment Status: $transactionStatus");
 
-        if (transactionStatus == "settlement" ||
-            transactionStatus == "capture") {
-          await postCourseUser();
-          return;
-        } else if (transactionStatus == "pending") {
-          await Future.delayed(Duration(seconds: 5));
+          if (transactionStatus == "settlement" ||
+              transactionStatus == "capture") {
+            print("✅ Payment successful!");
+            await postCourseUser();
+            return;
+          } else if (transactionStatus == "pending") {
+            print("⏳ Payment still pending. Retrying in 6 seconds...");
+            await Future.delayed(Duration(seconds: 6));
+            retryCount++;
+          } else {
+            print("❌ Payment failed or canceled.");
+            return;
+          }
         } else {
-          print("❌ Payment failed or canceled.");
-          setState(() {
-            isLoading = false;
-          });
-          return;
+          print("❌ Failed to fetch status: ${response.body}");
         }
-      } else {
-        print("❌ Failed to fetch transaction status: ${response.body}");
+      } catch (e) {
+        print("❌ Error checking payment status: $e");
       }
-    } catch (e) {
-      print("❌ Error checking payment status: $e");
     }
 
     print("⏳ Payment status check timed out.");
-    setState(() {
-      isLoading = false;
-    });
+    await QuickAlert.show(
+      context: context,
+      type: QuickAlertType.error,
+      title: "Payment Failed",
+      text: "Telah melebihi batas waktu yang diberikan ",
+      confirmBtnText: "OK",
+      confirmBtnColor: Colors.red,
+    );
   }
 
   //4. if Success do postCourseUser
@@ -474,8 +493,12 @@ class _CourseScreenState extends State<CourseScreen> {
                               child: Container(
                                 decoration: BoxDecoration(
                                   image: DecorationImage(
-                                    image: NetworkImage(
-                                        "${dotenv.env['BASE_URL_API']}${trainingFocusData.picture}"),
+                                    image: trainingFocusData.picture != null &&
+                                            trainingFocusData.picture.isNotEmpty
+                                        ? NetworkImage(
+                                            "${dotenv.env['BASE_URL_API']}${trainingFocusData.picture}")
+                                        : const AssetImage(
+                                            'assets/images/placehold.png'),
                                     fit: BoxFit.cover,
                                   ),
                                 ),

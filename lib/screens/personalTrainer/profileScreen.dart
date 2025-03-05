@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:semesta_gym/models/trainer.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/menu.dart';
 import 'package:semesta_gym/screens/personalTrainer/editProfileScreen.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 
 class ProfileScreenPt extends StatefulWidget {
   const ProfileScreenPt({super.key});
@@ -14,30 +19,84 @@ class ProfileScreenPt extends StatefulWidget {
 }
 
 class _ProfileScreenPtState extends State<ProfileScreenPt> {
+  final CurrentUser _currentUser = Get.put(CurrentUser());
+
+  Trainer? trainer;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration.zero, () async {
+      await fetchTrainers();
+    });
+  }
+
+  Future<void> fetchTrainers() async {
+    String? token = await RememberUserPrefs.readAuthToken();
+
+    try {
+      final response = await http.get(
+        Uri.parse('${dotenv.env['API_TRAINER']}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+
+        Trainer? foundTrainer;
+        for (var jsonItem in data) {
+          Trainer train = Trainer.fromJson(jsonItem);
+          if (train.user.id == _currentUser.user.id) {
+            foundTrainer = train;
+            break;
+          }
+        }
+
+        setState(() {
+          trainer = foundTrainer;
+          isLoading = false;
+        });
+
+        if (foundTrainer == null) {
+          print("Trainer not found");
+        }
+      } else {
+        throw Exception('Failed to load trainer');
+      }
+    } catch (error) {
+      print("Error fetching trainer: $error");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  signOutTrainer() async {
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.warning,
+      confirmBtnText: "Ya",
+      cancelBtnText: "Tidak",
+      showCancelBtn: true,
+      showConfirmBtn: true,
+      onCancelBtnTap: () => Get.back(),
+      onConfirmBtnTap: () {
+        RememberUserPrefs.removeUserInfo().then((value) {
+          Get.off(() => MenuScreen());
+        });
+      },
+      confirmBtnColor: Color(0xFFF68989),
+      title: "Logout",
+      text: "Ingin Logout dari apps?",
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final CurrentUser _currentUser = Get.put(CurrentUser());
-
-    signOutTrainer() async {
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.warning,
-        confirmBtnText: "Ya",
-        cancelBtnText: "Tidak",
-        showCancelBtn: true,
-        showConfirmBtn: true,
-        onCancelBtnTap: () => Get.back(),
-        onConfirmBtnTap: () {
-          RememberUserPrefs.removeUserInfo().then((value) {
-            Get.off(() => MenuScreen());
-          });
-        },
-        confirmBtnColor: Color(0xFFF68989),
-        title: "Logout",
-        text: "Ingin Logout dari apps?",
-      );
-    }
-
     return GetBuilder(
         init: CurrentUser(),
         initState: (currentState) {
@@ -51,7 +110,6 @@ class _ProfileScreenPtState extends State<ProfileScreenPt> {
                 "Profile",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-             
               backgroundColor: Colors.grey.shade300,
             ),
             body: Padding(
@@ -76,12 +134,24 @@ class _ProfileScreenPtState extends State<ProfileScreenPt> {
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 16),
                       child: Row(
+                        spacing: 24,
                         children: [
-                          Icon(
-                            Icons.person,
-                            size: 44,
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: trainer?.picture != null &&
+                                    trainer!.picture.isNotEmpty
+                                ? Image.network(
+                                    "${dotenv.env['BASE_URL_API']}${trainer!.picture}",
+                                    width: 80,
+                                    height: 80,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Icon(
+                                    Icons.person,
+                                    size: 80,
+                                    color: Colors.grey,
+                                  ),
                           ),
-                          SizedBox(width: 16),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [

@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:midtrans_sdk/midtrans_sdk.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/membership.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
@@ -32,7 +33,6 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
     super.initState();
     Future.delayed(Duration.zero, () async {
       await fetchMembership();
-
     });
     _initMidtrans();
   }
@@ -66,14 +66,15 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
         isLoading = true;
       });
 
-      // Generate Snap Token
+      // Step 1: Generate Snap Token
       String snapToken = await _generateSnapToken();
 
-      // Start Payment UI Flow
+      // Step 2: Start Midtrans UI Flow
       await _midtrans?.startPaymentUiFlow(token: snapToken);
 
       print("Waiting for Midtrans transaction result...");
 
+      // Step 3: Set up Midtrans callback listener
       _midtrans
           ?.setTransactionFinishedCallback((TransactionResult result) async {
         print("Transaction Result: ${result.toJson()}");
@@ -81,7 +82,24 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
         if (result.transactionStatus == TransactionResultStatus.settlement ||
             result.transactionStatus == TransactionResultStatus.capture) {
           print("Payment successful. Checking status...");
+
+          // Step 4: Check Payment Status
           await checkPaymentStatus();
+        } else if (result.transactionStatus ==
+            TransactionResultStatus.pending) {
+          print("🟡 Payment is still pending. Informing the user...");
+
+          await QuickAlert.show(
+            context: context,
+            type: QuickAlertType.warning,
+            confirmBtnText: "OK",
+            title: "Pending Payment",
+            text:
+                "Transaksi kamu dalam status pending. Tolong selesaikan payment dan tetap berada di screen ini sampai transaksi selesai.",
+            confirmBtnColor: Colors.orange,
+          );
+
+          checkPaymentStatus();
         } else if (result.transactionStatus == TransactionResultStatus.cancel) {
           print("Payment was canceled by the user.");
         } else {
@@ -170,59 +188,67 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
   //3. checkPaymentStatus and waiting before do next function
   Future<void> checkPaymentStatus() async {
     if (savedOrderId == null || savedOrderId!.isEmpty) {
-      print("❌ Order ID tidak tersedia.");
+      print("❌ Order ID not available.");
       return;
     }
 
     String serverKey = "${dotenv.env['MIDTRANS_SERVER_KEY']}";
     String base64Auth = "Basic " + base64Encode(utf8.encode("$serverKey:"));
 
-    try {
-      final response = await http.get(
-        Uri.parse("https://api.sandbox.midtrans.com/v2/$savedOrderId/status"),
-        headers: {
-          'Authorization': base64Auth,
-          'Content-Type': 'application/json'
-        },
-      );
+    int retryCount = 0;
+    const int maxRetries = 300;
 
-      print("🟡 Full Midtrans Response: ${response.body}");
+    while (retryCount < maxRetries) {
+      try {
+        final response = await http.get(
+          Uri.parse("https://api.sandbox.midtrans.com/v2/$savedOrderId/status"),
+          headers: {
+            'Authorization': base64Auth,
+            'Content-Type': 'application/json'
+          },
+        );
 
-      if (response.statusCode == 200) {
-        var data = json.decode(response.body);
+        if (response.statusCode == 200) {
+          var data = json.decode(response.body);
 
-        if (data == null || !data.containsKey('transaction_status')) {
-          print("❌ Error: Response does not contain transaction_status.");
-          return;
-        }
+          if (!data.containsKey('transaction_status')) {
+            print("❌ Error: No transaction_status in response.");
+            return;
+          }
 
-        String transactionStatus = data['transaction_status'] ?? "unknown";
-        print("✅ Payment Status: $transactionStatus");
+          String transactionStatus = data['transaction_status'] ?? "unknown";
+          print("🔍 Payment Status: $transactionStatus");
 
-        if (transactionStatus == "settlement" ||
-            transactionStatus == "capture") {
-          await postRegisterMembership();
-          return;
-        } else if (transactionStatus == "pending") {
-          await Future.delayed(Duration(seconds: 5));
+          if (transactionStatus == "settlement" ||
+              transactionStatus == "capture") {
+            print("✅ Payment successful!");
+            await postRegisterMembership();
+            return;
+          } else if (transactionStatus == "pending") {
+            print("⏳ Payment still pending. Retrying in 6 seconds...");
+            await Future.delayed(Duration(seconds: 6));
+            retryCount++;
+          } else {
+            print("❌ Payment failed or canceled.");
+            return;
+          }
         } else {
-          print("❌ Payment failed or canceled.");
-          setState(() {
-            isLoading = false;
-          });
-          return;
+          print("❌ Failed to fetch status: ${response.body}");
         }
-      } else {
-        print("❌ Failed to fetch transaction status: ${response.body}");
+      } catch (e) {
+        print("❌ Error checking payment status: $e");
       }
-    } catch (e) {
-      print("❌ Error checking payment status: $e");
     }
 
     print("⏳ Payment status check timed out.");
-    setState(() {
-      isLoading = false;
-    });
+    await QuickAlert.show(
+      context: context,
+      type: QuickAlertType.error,
+      title: "Payment Failed",
+      text: "Telah melebihi batas waktu yang diberikan ",
+      confirmBtnText: "OK",
+      confirmBtnColor: Colors.red,
+    );
   }
 
   //4. Post register Membership user
@@ -268,7 +294,10 @@ class _ListMembershipScreenState extends State<ListMembershipScreen> {
 
         await fetchMembership();
         setState(() {});
-        Get.offAll(() => Layout(index: 2,),
+        Get.offAll(
+            () => Layout(
+                  index: 2,
+                ),
             arguments: {"triggerPaymentMembership": true});
       } else {
         print("Error Response: ${response.body}");

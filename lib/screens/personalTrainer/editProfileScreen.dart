@@ -31,7 +31,6 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final CurrentUser _currentUser = Get.put(CurrentUser());
-  /* List<Trainer> trainers = []; */
   Trainer? trainer;
   List<TrainingFocus> _trainingFocusList = [];
   List<TrainingFocus> _selectedTrainingFocus = [];
@@ -147,7 +146,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  //fetch trainer by id 
+  //fetch trainer by id
   Future<void> fetchSingleTrainer(int? trainerId) async {
     if (trainerId == null || trainerId == 0) {
       print("Invalid trainer ID");
@@ -282,13 +281,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       print("Request Fields: ${request.fields}");
 
       if (_selectedImage != null) {
+        String filePath = _selectedImage!.path;
+        String fileExtension = filePath.split('.').last.toLowerCase();
+
+        String mimeType = 'image/jpeg';
+        if (fileExtension == 'png') {
+          mimeType = 'image/png';
+        } else if (fileExtension == 'jpg') {
+          mimeType = 'image/jpeg';
+        }
+
         var picture = await http.MultipartFile.fromPath(
           'picture',
-          _selectedImage!.path,
-          contentType: MediaType('image', 'jpeg'),
+          filePath,
+          contentType: MediaType.parse(mimeType),
         );
-        print("File Path: ${_selectedImage!.path}");
+
+        request.files.add(picture);
+        print("File Path: $filePath");
+        print("MIME Type: $mimeType");
       }
+
       var response = await request.send();
 
       if (response.statusCode == 200 || response.statusCode == 201) {

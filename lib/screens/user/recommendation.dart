@@ -43,9 +43,9 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         setState(() {
           trainingFocus = data
               .map((item) => {
-                    "id": item["id"],
-                    "name": item["name"],
-                    "picture": item["picture"],
+                    "id": item["id"] ?? 0,
+                    "name": item["name"] ?? '',
+                    "picture": item["picture"] ?? '',
                   })
               .toList();
           isLoading = false;
@@ -114,16 +114,36 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
                                     alignment: Alignment.center,
                                     children: [
                                       ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(100),
-                                        child: Image.network(
-                                          'http://10.0.2.2:3000/' +
-                                              item['picture'],
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                                          borderRadius:
+                                              BorderRadius.circular(100),
+                                          child: ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(100),
+                                            child: item['picture'] != null &&
+                                                    item['picture'].isNotEmpty
+                                                ? Image.network(
+                                                    '${dotenv.env['BASE_URL_API']}' +
+                                                        item['picture'],
+                                                    width: double.infinity,
+                                                    height: double.infinity,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return Image.asset(
+                                                        'assets/images/placehold.png',
+                                                        width: double.infinity,
+                                                        height: double.infinity,
+                                                        fit: BoxFit.cover,
+                                                      );
+                                                    },
+                                                  )
+                                                : Image.asset(
+                                                    'assets/images/placehold.png', 
+                                                    width: double.infinity,
+                                                    height: double.infinity,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                          )),
                                       if (isSelected)
                                         Container(
                                           width: double.infinity,
@@ -215,14 +235,4 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
       Get.snackbar("Error", "User data not found.");
     }
   }
-
-  /* Future<void> _confirmRecommendation() async {
-    if (userInfo != null) {
-      await RememberUserPrefs.setRecommendationChosen(
-          userInfo!.id.toString(), true);
-      Get.offAll(() => const Layout());
-    } else {
-      Get.snackbar("Error", "User data not found.");
-    }
-  } */
 }
