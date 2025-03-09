@@ -62,14 +62,18 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
   }
 
   void _toggleSelection(int id) {
-    setState(() {
-      if (selectedIds.contains(id)) {
-        selectedIds.remove(id);
-      } else {
+  setState(() {
+    if (selectedIds.contains(id)) {
+      selectedIds.remove(id);
+    } else {
+      if (selectedIds.length < 3) {
         selectedIds.add(id);
+      } else {
+        Get.snackbar("Peringatan!", "Kamu hanya bisa memilih max. 3 refrensi otot");
       }
-    });
-  }
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {

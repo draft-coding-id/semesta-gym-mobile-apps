@@ -7,6 +7,7 @@ import 'package:semesta_gym/screens/menu.dart';
 import 'package:semesta_gym/screens/personalTrainer/layoutPt.dart';
 import 'package:semesta_gym/screens/splashScreen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:semesta_gym/screens/user/recommendation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
                   if (userInfo.role == 'trainer') {
                     return LayoutPt();
                   } else {
-                    return Layout();
+                    return RecommendationScreen();
                   }
                 }
               },
