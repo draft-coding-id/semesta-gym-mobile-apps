@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/cardWithStar.dart';
-import 'package:semesta_gym/models/trainer.dart';
+import 'package:semesta_gym/models/trainer.dart' as trainerModel;
 import 'package:semesta_gym/models/user.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/user/booking/detailTrainerScreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:semesta_gym/screens/user/notification/notificationScreen.dart';
+import 'package:badges/badges.dart' as badges;
+import '../../models/booking.dart' as bookingModel;
+import '../../preferences/currentUser.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,16 +22,51 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final CurrentUser currentUser = Get.put(CurrentUser());
   bool isLoading = true;
-  List<Trainer> trainers = [];
-  List<Trainer> recommendedTrainers = [];
+  List<bookingModel.Booking> bookings = [];
+  List<trainerModel.Trainer> trainers = [];
+  List<trainerModel.Trainer> recommendedTrainers = [];
 
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration.zero, () async {
       await fetchTrainers();
+      await fetchBooking();
     });
+  }
+
+  Future<void> fetchBooking() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      String? token = await RememberUserPrefs.readAuthToken();
+      final response = await http.get(
+        Uri.parse(
+            '${dotenv.env['API_BOOKING']}member/${currentUser.user.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          bookings = data.map((json) => bookingModel.Booking.fromJson(json)).toList();
+        });
+      } else {
+        throw Exception('Failed to load bookings: ${response.statusCode}');
+      }
+    } catch (error) {
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> fetchTrainers() async {
@@ -42,11 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    List<int> selectedFocusIds =
-        await RememberUserPrefs.getRecommendations(userInfo.id.toString());
-
     try {
-      final response = await http.get(
+      // Fetch all trainers
+      final trainerResponse = await http.get(
         Uri.parse('${dotenv.env['API_TRAINER']}'),
         headers: {
           'Authorization': 'Bearer $token',
@@ -54,25 +90,41 @@ class _HomeScreenState extends State<HomeScreen> {
         },
       );
 
-      if (response.statusCode == 200) {
-        List<dynamic> data = json.decode(response.body);
-        List<Trainer> allTrainers =
-            data.map((json) => Trainer.fromJson(json)).toList();
-
-        List<Trainer> recommendedTrainers = allTrainers.where((trainer) {
-          List<int> trainerFocusIds =
-              trainer.trainingFocus.map((focus) => focus.id).toList();
-          return trainerFocusIds.any((id) => selectedFocusIds.contains(id));
-        }).toList();
-
-        setState(() {
-          trainers = allTrainers;
-          this.recommendedTrainers = recommendedTrainers;
-          isLoading = false;
-        });
-      } else {
+      if (trainerResponse.statusCode != 200) {
         throw Exception('Failed to load trainers');
       }
+
+      List<dynamic> trainerData = json.decode(trainerResponse.body);
+      List<trainerModel.Trainer> allTrainers =
+          trainerData.map((json) => trainerModel.Trainer.fromJson(json)).toList();
+
+      // Fetch recommended trainers from API_RECOMMENDATION
+      final recommendationResponse = await http.get(
+        Uri.parse('${dotenv.env['API_RECOMMENDATION']}${currentUser.user.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      List<trainerModel.Trainer> recommendedTrainers = [];
+
+      if (recommendationResponse.statusCode == 200) {
+        final recommendationData = json.decode(recommendationResponse.body);
+
+        if (recommendationData.containsKey('trainers')) {
+          List<dynamic> recommendedTrainerData = recommendationData['trainers'];
+
+          recommendedTrainers = recommendedTrainerData
+              .map((json) => trainerModel.Trainer.fromJson(json))
+              .toList();
+        }
+      }
+      setState(() {
+        trainers = allTrainers;
+        this.recommendedTrainers = recommendedTrainers;
+        isLoading = false;
+      });
     } catch (error) {
       print("Error fetching trainers: $error");
       setState(() {
@@ -80,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -93,13 +146,23 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.grey.shade300,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-            onPressed: () {
+        Padding(
+          padding: const EdgeInsets.only(right: 16.0),
+          child: GestureDetector(
+            onTap: () {
               Get.to(() => NotificationScreen());
             },
-            icon: const Icon(Icons.notifications),
-          )
-        ],
+            child: badges.Badge(
+              badgeContent: Text(
+                bookings.length.toString(),
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+              showBadge: bookings.isNotEmpty,
+              child: const Icon(Icons.notifications, size: 28),
+            ),
+          ),
+        ),
+      ],
       ),
       body: SingleChildScrollView(
         child: Padding(

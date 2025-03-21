@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
                   if (userInfo.role == 'trainer') {
                     return LayoutPt();
                   } else {
-                    return RecommendationScreen();
+                    return Layout();
                   }
                 }
               },

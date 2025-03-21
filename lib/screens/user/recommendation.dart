@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:semesta_gym/layout.dart';
 import 'package:semesta_gym/models/user.dart';
+import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 
 class RecommendationScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class RecommendationScreen extends StatefulWidget {
 }
 
 class _RecommendationScreenState extends State<RecommendationScreen> {
+  final CurrentUser currentUser = Get.put(CurrentUser());
   List<Map<String, dynamic>> trainingFocus = [];
   List<int> selectedIds = [];
   User? userInfo;
@@ -61,19 +63,72 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
     }
   }
 
-  void _toggleSelection(int id) {
-  setState(() {
-    if (selectedIds.contains(id)) {
-      selectedIds.remove(id);
-    } else {
-      if (selectedIds.length < 3) {
-        selectedIds.add(id);
-      } else {
-        Get.snackbar("Peringatan!", "Kamu hanya bisa memilih max. 3 refrensi otot");
-      }
-    }
-  });
+  Future<void> _confirmRecommendationDirectly() async {
+  if (userInfo != null) {
+    await RememberUserPrefs.setRecommendationChosen(
+        userInfo!.id.toString(), true);
+    await RememberUserPrefs.setRecommendation(
+        userInfo!.id.toString(), selectedIds);
+    Get.offAll(() => const Layout());
+  } else {
+    Get.snackbar("Error", "User data not found.");
+  }
 }
+
+  Future<void> _confirmRecommendation() async {
+  String? token = await RememberUserPrefs.readAuthToken();
+  if (userInfo != null) {
+    List<String> selectedNames = trainingFocus
+        .where((item) => selectedIds.contains(item['id']))
+        .map((item) => item['name'] as String)
+        .toList();
+
+    final requestBody = {
+      "userId": userInfo!.id,
+      "data": selectedNames,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse('${dotenv.env['API_RECOMMENDATION']}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          "Content-Type": "application/json"
+        },
+        body: json.encode(requestBody),
+      );
+
+      print("Response Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        await _confirmRecommendationDirectly();
+      } else {
+        Get.snackbar(
+            "Error", "Failed to submit recommendation: ${response.body}");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Failed to submit recommendation: $e");
+    }
+  } else {
+    Get.snackbar("Error", "User data not found.");
+  }
+}
+
+  void _toggleSelection(int id) {
+    setState(() {
+      if (selectedIds.contains(id)) {
+        selectedIds.remove(id);
+      } else {
+        if (selectedIds.length < 3) {
+          selectedIds.add(id);
+        } else {
+          Get.snackbar(
+              "Peringatan!", "Kamu hanya bisa memilih max. 3 refrensi otot");
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +197,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
                                                     },
                                                   )
                                                 : Image.asset(
-                                                    'assets/images/placehold.png', 
+                                                    'assets/images/placehold.png',
                                                     width: double.infinity,
                                                     height: double.infinity,
                                                     fit: BoxFit.cover,
@@ -226,17 +281,5 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         ),
       ),
     );
-  }
-
-  Future<void> _confirmRecommendation() async {
-    if (userInfo != null) {
-      await RememberUserPrefs.setRecommendationChosen(
-          userInfo!.id.toString(), true);
-      await RememberUserPrefs.setRecommendation(
-          userInfo!.id.toString(), selectedIds);
-      Get.offAll(() => const Layout());
-    } else {
-      Get.snackbar("Error", "User data not found.");
-    }
   }
 }

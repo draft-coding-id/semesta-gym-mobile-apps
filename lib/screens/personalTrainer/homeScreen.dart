@@ -9,6 +9,7 @@ import 'package:semesta_gym/screens/personalTrainer/historyScreen.dart';
 import 'package:semesta_gym/screens/personalTrainer/notificationScreen.dart';
 import 'package:semesta_gym/screens/personalTrainer/scheduleScreen.dart';
 import 'package:http/http.dart' as http;
+import 'package:badges/badges.dart' as badges;
 
 class HomeScreenPt extends StatefulWidget {
   const HomeScreenPt({super.key});
@@ -21,6 +22,7 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
   final CurrentUser _currentUser = Get.put(CurrentUser());
   bool isLoading = true;
   List<Booking> bookings = [];
+  List<Booking> bookingBadges = [];
 
   @override
   void initState() {
@@ -38,7 +40,8 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
     try {
       String? token = await RememberUserPrefs.readAuthToken();
       final response = await http.get(
-        Uri.parse('${dotenv.env['API_BOOKING']}trainer/${_currentUser.user.id}'),
+        Uri.parse(
+            '${dotenv.env['API_BOOKING']}trainer/${_currentUser.user.id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -48,15 +51,28 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
       print("_currentUser.user.id : ${_currentUser.user.id}");
 
       if (response.statusCode == 200) {
-        final List<dynamic> data =  json.decode(response.body);
+        final List<dynamic> data = json.decode(response.body);
         print("Raw Bookings Data: $data");
+
         setState(() {
+          // List for ListView.builder
           bookings = data
               .map((json) => Booking.fromJson(json))
-              .where((booking) => booking.acceptedTrainer == true && booking.done == false)
+              .where((booking) =>
+                  booking.acceptedTrainer == true && booking.done == false)
+              .toList();
+
+          // List for Badge Count in AppBar
+          bookingBadges = data
+              .map((json) => Booking.fromJson(json))
+              .where((booking) =>
+                  booking.reasonRejection == null &&
+                  booking.acceptedTrainer == false)
               .toList();
         });
-        print("Filtered Bookings: $bookings");
+
+        print("Filtered Bookings for ListView: $bookings");
+        print("Filtered Bookings for Badge: $bookingBadges");
       } else {
         throw Exception('Failed to load bookings: ${response.statusCode}');
       }
@@ -79,12 +95,22 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Get.to(() => NotificationScreen());
-            },
-            icon: const Icon(Icons.notifications),
-          )
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: GestureDetector(
+              onTap: () {
+                Get.to(() => NotificationScreen());
+              },
+              child: badges.Badge(
+                badgeContent: Text(
+                  bookingBadges.length.toString(),
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+                showBadge: bookingBadges.isNotEmpty,
+                child: const Icon(Icons.notifications, size: 28),
+              ),
+            ),
+          ),
         ],
         backgroundColor: Colors.grey.shade300,
       ),
@@ -96,7 +122,8 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
                 ? const Center(
                     child: Text(
                       "Belum ada member booking",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   )
                 : ListView.builder(
@@ -139,7 +166,8 @@ class _HomeScreenPtState extends State<HomeScreenPt> {
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    Text("No. Hp : ${booking.member.phone ?? "N/A"}"),
+                                    Text(
+                                        "No. Hp : ${booking.member.phone ?? "N/A"}"),
                                   ],
                                 ),
                                 const Icon(Icons.person, size: 44),

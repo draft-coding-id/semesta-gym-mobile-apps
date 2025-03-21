@@ -46,6 +46,7 @@ dependencies:
   intl: ^0.18.0
   midtrans_sdk: ^0.4.0
   flutter_dotenv: ^5.2.1
+  badges: ^3.1.2
 
 dev_dependencies:
   flutter_test:
