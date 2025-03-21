@@ -6,6 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet_field.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:path_provider/path_provider.dart';
@@ -159,7 +160,7 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
       request.fields['phone'] = phoneNumberController.text;
       request.fields['description'] = descriptionController.text;
       request.fields['hoursOfPractice'] = workoutHoursController.text;
-      request.fields['price'] = pricePerSessionController.text;
+      request.fields['price'] = pricePerSessionController.text.replaceAll(RegExp(r'[^0-9]'), '');
 
       _selectedTrainingFocus.asMap().forEach((index, focus) {
         request.fields['trainingFocus[$index]'] = focus.id.toString();
@@ -584,30 +585,51 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    MyTextFormField(
-                      controller: workoutHoursController,
-                      name: "Jam Latihan (Contoh: 12:00-14:00)",
-                      keyboardType: TextInputType.datetime,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9:-]')),
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter a time range";
+                    GestureDetector(
+                      onTap: () async {
+                        TimeOfDay? pickedStart = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
+
+                        if (pickedStart != null) {
+                          TimeOfDay? pickedEnd = await showTimePicker(
+                            context: context,
+                            initialTime: pickedStart.replacing(hour: (pickedStart.hour + 1) % 24), 
+                          );
+
+                          if (pickedEnd != null) {
+                            String formattedStart = _formatTime(pickedStart);
+                            String formattedEnd = _formatTime(pickedEnd);
+
+                            workoutHoursController.text = "$formattedStart-$formattedEnd";
+                          }
                         }
-                        final timeRangeRegex = RegExp(
-                            r'^(?:[01]\d|2[0-3]):[0-5]\d-(?:[01]\d|2[0-3]):[0-5]\d$');
-                        if (!timeRangeRegex.hasMatch(value)) {
-                          return "Enter a valid time range (HH:mm-HH:mm)";
-                        }
-                        return null;
                       },
-                      onSaved: (value) {
-                        workoutHoursController.text = value!;
-                      },
+                      child: AbsorbPointer(
+                        child: MyTextFormField(
+                          controller: workoutHoursController,
+                          name: "Jam Latihan (Contoh: 12:00-14:00)",
+                          keyboardType: TextInputType.datetime,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'[0-9:-]')),
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Please enter a time range";
+                            }
+                            final timeRangeRegex = RegExp(
+                                r'^(?:[01]\d|2[0-3]):[0-5]\d-(?:[01]\d|2[0-3]):[0-5]\d$');
+                            if (!timeRangeRegex.hasMatch(value)) {
+                              return "Enter a valid time range (HH:mm-HH:mm)";
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            workoutHoursController.text = value!;
+                          },
+                        ),
+                      ),
                     ),
                     SizedBox(
                       height: 16,
@@ -623,26 +645,30 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
                       height: 5,
                     ),
                     MyTextFormField(
-                      controller: pricePerSessionController,
-                      name: "Harga Perbulan/Sesi",
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Please enter the price";
-                        }
-                        String numericValue =
-                            value.replaceAll(RegExp(r'[^0-9]'), '');
-                        if (numericValue.isEmpty ||
-                            int.tryParse(numericValue) == null) {
-                          return "Invalid price format";
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        pricePerSessionController.text = value!;
-                      },
-                    ),
+  controller: pricePerSessionController,
+  name: "Harga Perbulan/Sesi",
+  keyboardType: TextInputType.number,
+  inputFormatters: [
+    FilteringTextInputFormatter.digitsOnly, 
+    CurrencyInputFormatter(),
+  ],
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return "Please enter the price";
+    }
+    String numericValue = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (numericValue.isEmpty || int.tryParse(numericValue) == null) {
+      return "Invalid price format";
+    }
+    return null;
+  },
+  onSaved: (value) {
+    // Remove currency symbol and commas before saving
+    String numericValue = value!.replaceAll(RegExp(r'[^0-9]'), '');
+    print("Submitted Price: $numericValue"); // Debugging log
+    pricePerSessionController.text = numericValue;
+  },
+),
                     SizedBox(
                       height: 16,
                     ),
@@ -741,4 +767,33 @@ class _RegisterScreenTrainerState extends State<RegisterScreenTrainer> {
       ),
     );
   }
+}
+
+class CurrencyInputFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat.currency(
+    locale: 'id_ID',
+    symbol: 'Rp ', 
+    decimalDigits: 0,
+  );
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    
+    if (newText.isEmpty) return newValue;
+
+    String formatted = _formatter.format(int.parse(newText));
+
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+String _formatTime(TimeOfDay time) {
+  final now = DateTime.now();
+  final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+  return DateFormat("HH:mm").format(dt);
 }
