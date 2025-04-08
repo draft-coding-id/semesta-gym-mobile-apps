@@ -5,13 +5,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:semesta_gym/components/cardWithStar.dart';
 import 'package:semesta_gym/models/trainer.dart' as trainerModel;
-import 'package:semesta_gym/models/user.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:semesta_gym/screens/user/booking/detailTrainerScreen.dart';
 import 'package:http/http.dart' as http;
 import 'package:semesta_gym/screens/user/notification/notificationScreen.dart';
 import 'package:badges/badges.dart' as badges;
 import '../../models/booking.dart' as bookingModel;
+import 'package:semesta_gym/models/user.dart' as userModel;
+import '../../models/payment.dart' as paymentModel;
 import '../../preferences/currentUser.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,6 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final CurrentUser currentUser = Get.put(CurrentUser());
   bool isLoading = true;
   List<bookingModel.Booking> bookings = [];
+  List<bookingModel.Booking> validBookings = [];
+  List<paymentModel.Payment> payments = [];
   List<trainerModel.Trainer> trainers = [];
   List<trainerModel.Trainer> recommendedTrainers = [];
 
@@ -37,41 +40,66 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> fetchBooking() async {
-    setState(() {
-      isLoading = true;
-    });
+Future<void> fetchBooking() async {
+  setState(() {
+    isLoading = true;
+  });
 
-    try {
-      String? token = await RememberUserPrefs.readAuthToken();
-      final response = await http.get(
-        Uri.parse(
-            '${dotenv.env['API_BOOKING']}member/${currentUser.user.id}'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
+  try {
+    String? token = await RememberUserPrefs.readAuthToken();
+
+    final bookingResponse = await http.get(
+      Uri.parse('${dotenv.env['API_BOOKING']}member/${currentUser.user.id}'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (bookingResponse.statusCode == 200) {
+      final List<dynamic> data = json.decode(bookingResponse.body);
+      bookings = data.map((json) => bookingModel.Booking.fromJson(json)).toList();
+    }
+
+    final paymentResponse = await http.get(
+      Uri.parse(
+            '${dotenv.env['API_PAYMENT_BY_USER_ID']}${currentUser.user.id}'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (paymentResponse.statusCode == 200) {
+      final List<dynamic> paymentData = json.decode(paymentResponse.body);
+      payments = paymentData.map((json) => paymentModel.Payment.fromJson(json)).toList();
+    }
+
+    validBookings = bookings.where((booking) {
+      final relatedPayment = payments.firstWhere(
+        (payment) => payment.paymentableId == booking.id,
+        orElse: () => paymentModel.Payment(0, 0, "", "", "", "", '', 0, paymentModel.User("")),
       );
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        setState(() {
-          bookings = data.map((json) => bookingModel.Booking.fromJson(json)).toList();
-        });
-      } else {
-        throw Exception('Failed to load bookings: ${response.statusCode}');
-      }
-    } catch (error) {
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+      return 
+        relatedPayment.paymentStatus != "success";
+    }).toList();
+
+    setState(() {
+      bookings = validBookings;
+    });
+  } catch (error) {
+    print("Error fetching bookings or payments: $error");
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
   }
+}
 
   Future<void> fetchTrainers() async {
     String? token = await RememberUserPrefs.readAuthToken();
-    User? userInfo = await RememberUserPrefs.readUserInfo();
+    userModel.User? userInfo = await RememberUserPrefs.readUserInfo();
 
     if (userInfo == null) {
       setState(() {
@@ -81,7 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      // Fetch all trainers
       final trainerResponse = await http.get(
         Uri.parse('${dotenv.env['API_TRAINER']}'),
         headers: {
@@ -98,7 +125,6 @@ class _HomeScreenState extends State<HomeScreen> {
       List<trainerModel.Trainer> allTrainers =
           trainerData.map((json) => trainerModel.Trainer.fromJson(json)).toList();
 
-      // Fetch recommended trainers from API_RECOMMENDATION
       final recommendationResponse = await http.get(
         Uri.parse('${dotenv.env['API_RECOMMENDATION']}${currentUser.user.id}'),
         headers: {
@@ -234,3 +260,38 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+
+
+/*   Future<void> fetchBooking() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      String? token = await RememberUserPrefs.readAuthToken();
+      final response = await http.get(
+        Uri.parse(
+            '${dotenv.env['API_BOOKING']}member/${currentUser.user.id}'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          bookings = data.map((json) => bookingModel.Booking.fromJson(json)).toList();
+        });
+      } else {
+        throw Exception('Failed to load bookings: ${response.statusCode}');
+      }
+    } catch (error) {
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+ */
