@@ -10,7 +10,9 @@ import 'package:semesta_gym/models/payment.dart';
 import 'package:semesta_gym/preferences/currentUser.dart';
 import 'package:semesta_gym/preferences/rememberUser.dart';
 import 'package:http/http.dart' as http;
+import 'package:semesta_gym/screens/user/booking/bookingScreen.dart';
 import 'package:semesta_gym/screens/user/notification/payBookingScreen.dart';
+import 'package:semesta_gym/screens/user/notification/reBookingScreen.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -202,7 +204,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                         ),
                                         confirmBtnText: "Booking Ulang",
                                         onConfirmBtnTap: () {
-                                          Get.offAll(() => Layout());
+                                          Get.off(() => ReBookingScreen(), arguments: booking);
                                         },
                                       );
                                     }
